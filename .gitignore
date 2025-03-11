@@ -1,0 +1,19 @@
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Virtual environment
+.venv
+.venv/
+venv/
+ENV/
+env/
+
+# PyCharm project files
+.idea/
+.idea
+idea/
+
+# Windows specific files
+Thumbs.db
