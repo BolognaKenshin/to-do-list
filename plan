@@ -64,7 +64,16 @@ THINGS TO RESEARCH:
 -
 
 Passwords:
+    - Need to make a log-in form
 
 
-
+REVISED PLAN AS OF 3/13:
+    - 4 tables will exist
+    - User Table to store user email, password, username
+    - To-Do List table to store to-do-list names
+    - To-Do List Items table to store items in each to-do list
+    - A relationship table to establish many-to-many relationships
+            * This is so users can share/edit the same to-do lists.
+            * This table just holds two columns, each holding foreign keys to each table.
+            * See https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html, Many-to-Many
 
