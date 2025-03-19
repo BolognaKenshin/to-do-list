@@ -76,4 +76,5 @@ REVISED PLAN AS OF 3/13:
             * This is so users can share/edit the same to-do lists.
             * This table just holds two columns, each holding foreign keys to each table.
             * See https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html, Many-to-Many
+    - Table will contain relationships between users and a list, specifically so they can edit the same list
 

@@ -10,10 +10,32 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get("FLASK_KEY")
 login_manager = LoginManager()
 
-app.config['SECRET_KEY'] = os.environ.get("FLASK_KEY")
+class Base(DeclarativeBase):
+    pass
+
+db = SQLAlchemy(model_class=Base)
+db.init_app(app)
 Bootstrap5(app)
+
+
+class User(db.Model):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+class ListName(db.Model):
+    __tablename__ = "list_name"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+class ToDoItem(db.Model):
+    __tablename__ = "to_do_items"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+class Relationship(db.Model):
+    __tablename__ = "relationship_table"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 @app.route("/")
 def homepage():
