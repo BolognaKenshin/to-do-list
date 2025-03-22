@@ -1,5 +1,10 @@
-{% include "header.html" %}
+{% include "header.html" %} {% from "bootstrap5/form.html" import render_form %}
 
-<main></main>
+<main>
+    <div id="new-user-div">
+        <h1 id="new-user-h1">New User Registration</h1>
+        {{ render_form(form, novalidate=True) }}
+    </div>
+</main>
 
 {% include "footer.html" %}

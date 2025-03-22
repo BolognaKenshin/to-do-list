@@ -1,5 +1,18 @@
-{% include "header.html" %}
+{% include "header.html" %} {% from "bootstrap5/form.html" import render_form %}
 
-<main></main>
+<main>
+    <div id="log-in-div">
+        <h1 id="log-in-h1">Log in</h1>
+
+        {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+        <p class="flash">{{ message }}</p>
+        {% endfor %}
+        {% endwith %}
+
+        {{ render_form(form, novalidate=True) }}
+    </div>
+</main>
+
 
 {% include "footer.html" %}

@@ -1,5 +1,10 @@
         <footer>
-            <div id="footer-bar"></div>
+            <div id="footer-bar">
+                {% if current_user.is_authenticated %}
+                <i class="bi bi-person-circle"></i>
+                <span id="top-bar-email">{{ current_user.email }}</span>
+                {% endif %}
+            </div>
         </footer>
         {{ bootstrap.load_js() }}
     </body>

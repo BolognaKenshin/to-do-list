@@ -1,0 +1,9 @@
+{% include 'header.html' %} {% from "bootstrap5/form.html" import render_form %}
+
+<main id="new-list-main">
+    <div id="list-name-bar">
+        {{ render_form(form, novalidate=True) }}
+    </div>
+</main>
+
+{% include 'footer.html' %}
