@@ -1,4 +1,3 @@
-from datetime import date
 from flask import Flask, flash, redirect,render_template, request, url_for
 from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
