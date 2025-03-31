@@ -2,15 +2,24 @@ a {
     white-space: nowrap;
 }
 
+.form {
+    width: 400px;
+}
 
 .form-control {
     width: 400px;
     text-align: center;
 }
 
-@media (max-width: 450px) {
+@media (max-width: 600px) {
     .form-control {
-        width: 300px;
+        width: 350px;
+    }
+}
+
+@media (max-width: 540px) {
+    .form-control {
+        width: 200px;
     }
 }
 
@@ -97,9 +106,12 @@ html, body {
 }
 
 #list-name-bar {
+    align-items: center;
     background-color: #10486d;
+    display: flex;
     height: 80px;
     width: 100%;
+    padding: 0 50px;
 }
 
 main {
@@ -166,6 +178,14 @@ nav {
     #top-bar {
         padding: 0 10px;
     }
+}
+
+#save-button {
+    border-radius: 10px;
+    flex-shrink: 0;
+    margin-left: auto;
+    height: 40px;
+    width: 80px;
 }
 
 #top-bar-email {

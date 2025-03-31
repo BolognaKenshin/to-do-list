@@ -78,3 +78,11 @@ REVISED PLAN AS OF 3/13:
             * See https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html, Many-to-Many
     - Table will contain relationships between users and a list, specifically so they can edit the same list
 
+3/26:
+    - Repaired some HTML for dynamic sizing
+    - Consulted with ChatGPT, researched, remembered how relationships more or less work
+    - Relationship table works automatically, just need both objects to exist, then register to User
+    - Got New List Name form to work, takes list names, also shows them in all_lists.
+    - Need to build on it. Use name and items should only save when user clicks "save".
+    - To accomplish above, it'd be best likely to save in session object, then save db.commits for "save".
+

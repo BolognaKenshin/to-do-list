@@ -1,9 +1,11 @@
-from flask import Flask, flash, redirect,render_template, request, url_for
+from flask import Flask, flash, redirect,render_template, request, session, url_for
 from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from forms import LoginForm, NewUserForm, ToDoNameForm
 import os
+import random
+import string
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, Table
 from typing import List
@@ -47,7 +49,7 @@ class ListName(db.Model):
     list_name: Mapped[str] = mapped_column(String(250), nullable=False)
     list_users: Mapped[List['Users']] = relationship(secondary=relationships_table, back_populates="list_names")
     list_items: Mapped[List['ToDoItem']] = relationship()
-    list_url: Mapped[str] = mapped_column(String(), nullable=False, unique=True)
+    list_url_id: Mapped[str] = mapped_column(String(), nullable=False, unique=True)
 
 class ToDoItem(db.Model):
     __tablename__ = "to_do_items"
@@ -59,6 +61,19 @@ class ToDoItem(db.Model):
 
 with app.app_context():
     db.create_all()
+
+# Generates a random series of characters, appends to a string 4-10 characters long
+def generate_url_id(chars=string.ascii_letters + string.digits):
+    id_length = random.randint(4, 10)
+    list_name_urls = db.session.query(ListName.list_url_id).all()
+    generated_id = ""
+    for _ in range(id_length):
+        generated_id += random.choice(chars)
+    if any(generated_id == list_name_url[0] for list_name_url in list_name_urls):
+        return generate_url_id()
+    else:
+        return generated_id
+
 
 @app.route("/")
 def homepage():
@@ -119,8 +134,29 @@ def current_list():
 
 @app.route("/new-list", methods=["GET", "POST"])
 def new_list():
+    session['list_url_id'] = generate_url_id()
     form = ToDoNameForm()
+    if form.validate_on_submit():
+        session['list_name'] = form.to_do_name.data
     return render_template('new-list.html', current_user=current_user, form=form)
+
+@app.route("/save-list", methods=["GET", "POST"])
+def save_list():
+    l_name = session['list_name']
+    l_url_id = session['list_url_id']
+    if not any(l_name == list_name.list_name for list_name in current_user.list_names):
+        new_list_name = ListName(
+            list_name=l_name,
+            list_url_id=l_url_id,
+        )
+        db.session.add(new_list_name)
+        db.session.commit()
+        current_user.list_names.append(new_list_name)
+        db.session.commit()
+        return redirect(url_for("all_lists", current_user=current_user))
+    else:
+        flash("There is another list with that name registered to your account.")
+    return redirect(url_for('all_lists'))
 
 if __name__ == "__main__":
     app.run(debug=True)

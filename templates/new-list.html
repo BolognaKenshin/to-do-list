@@ -2,7 +2,15 @@
 
 <main id="new-list-main">
     <div id="list-name-bar">
+        {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+        <p class="flash">{{ message }}</p>
+        {% endfor %}
+        {% endwith %}
+
         {{ render_form(form, novalidate=True) }}
+
+        <button id="save-button" onclick="window.location.href='{{ url_for('save_list') }}'">Save</button>
     </div>
 </main>
 

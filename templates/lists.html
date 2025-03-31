@@ -2,6 +2,11 @@
 
 <main>
         <h1>This page will show all lists!</h1>
+        {% for list in current_user.list_names %}
+        <div>
+                <h2>{{ list.list_name }}</h2>
+        </div>
+        {% endfor %}
 </main>
 
 {% include 'footer.html' %}
