@@ -8,9 +8,12 @@
         {% endfor %}
         {% endwith %}
 
-        {{ render_form(form, novalidate=True) }}
+        {{ render_form(name_form, novalidate=True) }}
 
         <button id="save-button" onclick="window.location.href='{{ url_for('save_list') }}'">Save</button>
+    </div>
+    <div id="list-item-bar">
+        {{ render_form(item_form, novalidate=True) }}
     </div>
 </main>
 

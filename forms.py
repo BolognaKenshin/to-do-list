@@ -26,7 +26,7 @@ class ToDoNameForm(FlaskForm):
 
 # To generate to-do items for each to-do list
 class ToDoItemForm(FlaskForm):
-    task = StringField()
-    task_color = ColorField()
-    task_importance = BooleanField("Important")
-    task_complete = BooleanField("Task Complete?")
+    task = StringField("", validators=[DataRequired()])
+    # task_color = ColorField()
+    # task_importance = BooleanField("Important")
+    # task_complete = BooleanField("Task Complete?")

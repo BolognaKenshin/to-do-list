@@ -2,7 +2,7 @@ from flask import Flask, flash, redirect,render_template, request, session, url_
 from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
-from forms import LoginForm, NewUserForm, ToDoNameForm
+from forms import LoginForm, NewUserForm, ToDoItemForm, ToDoNameForm
 import os
 import random
 import string
@@ -135,10 +135,11 @@ def current_list():
 @app.route("/new-list", methods=["GET", "POST"])
 def new_list():
     session['list_url_id'] = generate_url_id()
-    form = ToDoNameForm()
-    if form.validate_on_submit():
-        session['list_name'] = form.to_do_name.data
-    return render_template('new-list.html', current_user=current_user, form=form)
+    name_form = ToDoNameForm()
+    item_form = ToDoItemForm()
+    if name_form.validate_on_submit():
+        session['list_name'] = name_form.to_do_name.data
+    return render_template('new-list.html', current_user=current_user, name_form=name_form, item_form=item_form)
 
 @app.route("/save-list", methods=["GET", "POST"])
 def save_list():
