@@ -65,11 +65,11 @@ with app.app_context():
 # Generates a random series of characters, appends to a string 4-10 characters long
 def generate_url_id(chars=string.ascii_letters + string.digits):
     id_length = random.randint(4, 10)
-    list_name_urls = db.session.query(ListName.list_url_id).all()
     generated_id = ""
     for _ in range(id_length):
         generated_id += random.choice(chars)
-    if any(generated_id == list_name_url[0] for list_name_url in list_name_urls):
+    list_name_urls = db.session.execute(db.Select(ListName.list_url_id)).scalars().all()
+    if any(generated_id == list_name_url for list_name_url in list_name_urls):
         return generate_url_id()
     else:
         return generated_id
@@ -132,17 +132,32 @@ def all_lists():
 def current_list():
     pass
 
+@app.route("/name-list", methods=["GET", "POST"])
+def name_list():
+    name_form = ToDoNameForm()
+    session['list_items'] = []
+    if name_form.validate_on_submit():
+        l_name = name_form.to_do_name.data
+        if not any(l_name == list_name.list_name for list_name in current_user.list_names):
+            session['list_name'] = name_form.to_do_name.data
+            print('routing to new list page!')
+            return redirect(url_for('new_list'))
+        else:
+            flash("There is another list with that name registered to your account.")
+    return render_template('name-list.html', current_user=current_user, name_form=name_form)
+
 @app.route("/new-list", methods=["GET", "POST"])
 def new_list():
-    session['list_url_id'] = generate_url_id()
-    name_form = ToDoNameForm()
     item_form = ToDoItemForm()
-    if name_form.validate_on_submit():
-        session['list_name'] = name_form.to_do_name.data
-    return render_template('new-list.html', current_user=current_user, name_form=name_form, item_form=item_form)
+    if item_form.validate_on_submit():
+        new_item = {"task": item_form.task.data}
+        session['list_items'].append(new_item)
+        session.modified = True
+    return render_template('new-list.html', current_user=current_user, list_name=session['list_name'], item_form=item_form, tasks=session['list_items'])
 
 @app.route("/save-list", methods=["GET", "POST"])
 def save_list():
+    session['list_url_id'] = generate_url_id()
     l_name = session['list_name']
     l_url_id = session['list_url_id']
     if not any(l_name == list_name.list_name for list_name in current_user.list_names):
@@ -151,9 +166,9 @@ def save_list():
             list_url_id=l_url_id,
         )
         db.session.add(new_list_name)
-        db.session.commit()
         current_user.list_names.append(new_list_name)
         db.session.commit()
+
         return redirect(url_for("all_lists", current_user=current_user))
     else:
         flash("There is another list with that name registered to your account.")

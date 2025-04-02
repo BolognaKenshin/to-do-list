@@ -8,12 +8,20 @@
         {% endfor %}
         {% endwith %}
 
-        {{ render_form(name_form, novalidate=True) }}
+        <p class="list-name">{{ list_name }}</p>
 
         <button id="save-button" onclick="window.location.href='{{ url_for('save_list') }}'">Save</button>
     </div>
     <div id="list-item-bar">
         {{ render_form(item_form, novalidate=True) }}
+    </div>
+
+    <div id="tasks-container">
+        {% for task in tasks %}
+        <div class="task-div">
+            <p>{{ task }}</p>
+        </div>
+        {% endfor %}
     </div>
 </main>
 

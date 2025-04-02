@@ -19,7 +19,7 @@ class LoginForm(FlaskForm):
 
 # To generate the name of each to-do list, which will be the parent to items in the to-do items table
 class ToDoNameForm(FlaskForm):
-    to_do_name = StringField("", default=f"My List - {formatted_date}", validators=[DataRequired()])
+    to_do_name = StringField("", default=formatted_date, validators=[DataRequired()])
     # Placeholder below - want to let user click list name, press "Enter" to change
     # submit  = SubmitField("Enter Name")
     # date will be automatically applied via first submission
