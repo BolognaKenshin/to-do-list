@@ -29,6 +29,8 @@ Bootstrap5(app)
 def load_user(user_id):
     return db.get_or_404(Users, user_id)
 
+
+# Holds relationships between multiple users to a list name
 relationships_table = Table(
     "relationships_table",
     Base.metadata,
@@ -36,6 +38,7 @@ relationships_table = Table(
     Column("list_name_id", ForeignKey("list_names.id"), primary_key=True),
 )
 
+# Multiple users can have a relationship with a list name
 class Users(db.Model, UserMixin):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -43,6 +46,7 @@ class Users(db.Model, UserMixin):
     password: Mapped[str] = mapped_column(String(250), nullable=False)
     list_names: Mapped[List['ListName']] = relationship(secondary=relationships_table, back_populates="list_users")
 
+# List names will pull the ToDoItems
 class ListName(db.Model):
     __tablename__ = "list_names"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -51,6 +55,7 @@ class ListName(db.Model):
     list_items: Mapped[List['ToDoItem']] = relationship()
     list_url_id: Mapped[str] = mapped_column(String(), nullable=False, unique=True)
 
+# Pulled via relationship with list name
 class ToDoItem(db.Model):
     __tablename__ = "to_do_items"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -62,7 +67,8 @@ class ToDoItem(db.Model):
 with app.app_context():
     db.create_all()
 
-# Generates a random series of characters, appends to a string 4-10 characters long
+# Generates a random series of characters, returns a random string 4-10 characters long meant to be assigned to list names
+# Function also checks if the id exists already in the database, will run again until it finds one not used
 def generate_url_id(chars=string.ascii_letters + string.digits):
     id_length = random.randint(4, 10)
     generated_id = ""
@@ -79,6 +85,7 @@ def generate_url_id(chars=string.ascii_letters + string.digits):
 def homepage():
     return render_template("index.html")
 
+# For new users - Salts and hashes their password, stores in a database
 @app.route("/sign-up", methods=["GET", "POST"])
 def sign_up():
     form = NewUserForm()
@@ -124,55 +131,84 @@ def logout():
     logout_user()
     return redirect(url_for('log_in'))
 
+# Route for displaying all lists user has generated
 @app.route("/all")
 def all_lists():
     return render_template("lists.html", current_user=current_user)
 
-@app.route("/list", methods=["GET", "POST"])
-def current_list():
-    pass
-
+# Generated page for naming the list - Checks if the name exists before letting you submit and go to new_list()
+# List name is stored in flask session
 @app.route("/name-list", methods=["GET", "POST"])
 def name_list():
     name_form = ToDoNameForm()
     session['list_items'] = []
     if name_form.validate_on_submit():
         l_name = name_form.to_do_name.data
+        # Check for if user already has a list with the same name
         if not any(l_name == list_name.list_name for list_name in current_user.list_names):
             session['list_name'] = name_form.to_do_name.data
-            print('routing to new list page!')
             return redirect(url_for('new_list'))
         else:
             flash("There is another list with that name registered to your account.")
     return render_template('name-list.html', current_user=current_user, name_form=name_form)
 
+# Generated after naming your list, lets you create to-do items - Stores them in flask session
 @app.route("/new-list", methods=["GET", "POST"])
 def new_list():
+    item_form = ToDoItemForm()
+    displayed_items = []
+    if item_form.validate_on_submit():
+        new_item = {f"item {len(session['list_items']) + 1}": {"task": item_form.task.data}}
+        session['list_items'].append(new_item)
+        session.modified = True
+        index = 1
+        for item in session['list_items']:
+            displayed_items.append(item[f'item {index}']['task'])
+            index += 1
+    return render_template('new-list.html',
+                           current_user=current_user,
+                           list_name=session['list_name'],
+                           item_form=item_form,
+                           tasks=displayed_items)
+
+# Page for editing an existing list - Add new items - Rename list
+@app.route("/edit-list", methods=["GET", "POST"])
+def edit_list():
     item_form = ToDoItemForm()
     if item_form.validate_on_submit():
         new_item = {"task": item_form.task.data}
         session['list_items'].append(new_item)
         session.modified = True
-    return render_template('new-list.html', current_user=current_user, list_name=session['list_name'], item_form=item_form, tasks=session['list_items'])
+    return render_template('new-list.html', current_user=current_user, list_name=session['list_name'],
+                           item_form=item_form, tasks=session['list_items'])
 
-@app.route("/save-list", methods=["GET", "POST"])
-def save_list():
+
+# Route for saving a new list
+@app.route("/save-new-list", methods=["GET", "POST"])
+def save_new_list():
     session['list_url_id'] = generate_url_id()
     l_name = session['list_name']
     l_url_id = session['list_url_id']
-    if not any(l_name == list_name.list_name for list_name in current_user.list_names):
-        new_list_name = ListName(
-            list_name=l_name,
-            list_url_id=l_url_id,
-        )
-        db.session.add(new_list_name)
-        current_user.list_names.append(new_list_name)
-        db.session.commit()
+    new_list_name = ListName(
+        list_name=l_name,
+        list_url_id=l_url_id,
+    )
+    current_user.list_names.append(new_list_name)
 
-        return redirect(url_for("all_lists", current_user=current_user))
-    else:
-        flash("There is another list with that name registered to your account.")
-    return redirect(url_for('all_lists'))
+    # Save index is to properly reference ascending item names (item 1, item 2, item 3)
+    save_index = 1
+    for item in session['list_items']:
+        new_item = ToDoItem(
+            item=item[f'item {save_index}']['task'],
+            list_name=new_list_name,
+            order_num=save_index
+        )
+        db.session.add(new_item)
+        save_index += 1
+
+    db.session.commit()
+    return redirect(url_for("all_lists", current_user=current_user))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
