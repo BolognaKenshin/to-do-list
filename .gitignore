@@ -17,3 +17,6 @@ idea/
 
 # Windows specific files
 Thumbs.db
+
+# Meant for database file
+.db
