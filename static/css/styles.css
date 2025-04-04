@@ -2,6 +2,19 @@ a {
     white-space: nowrap;
 }
 
+#all-lists-headline {
+    color: white;
+    text-align: center;
+}
+
+#all-lists-main{
+    display: block;
+}
+
+.edit-pencil {
+    color: black;
+}
+
 .form {
     width: 400px;
 }
@@ -103,6 +116,26 @@ a {
 
 html, body {
     background-color: #17669a;
+}
+
+.list-card {
+    align-items: center;
+    background-color: white;
+    border-radius: 10px;
+    display: flex;
+    height: 200px;
+    width: 300px;
+    justify-content: center;
+    margin: 10px;
+    text-align: center;
+}
+
+#list-card-holder {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    min-height: calc(100vh - 200px);
+    padding: 80px;
 }
 
 #list-item-bar {

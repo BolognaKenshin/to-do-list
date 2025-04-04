@@ -83,6 +83,8 @@ def generate_url_id(chars=string.ascii_letters + string.digits):
 
 @app.route("/")
 def homepage():
+    if current_user.is_authenticated:
+        return redirect(url_for('all_lists'))
     return render_template("index.html")
 
 # For new users - Salts and hashes their password, stores in a database
@@ -172,7 +174,18 @@ def new_list():
                            tasks=displayed_items)
 
 # Page for editing an existing list - Add new items - Rename list
-@app.route("/edit-list", methods=["GET", "POST"])
+@app.route("/edit-new-list", methods=["GET", "POST"])
+def edit_new_list():
+    item_form = ToDoItemForm()
+    if item_form.validate_on_submit():
+        new_item = {"task": item_form.task.data}
+        session['list_items'].append(new_item)
+        session.modified = True
+    return render_template('new-list.html', current_user=current_user, list_name=session['list_name'],
+                           item_form=item_form, tasks=session['list_items'])
+
+
+@app.route("/edit-list/<list_url_id>", methods=["GET", "POST"])
 def edit_list():
     item_form = ToDoItemForm()
     if item_form.validate_on_submit():
@@ -181,6 +194,7 @@ def edit_list():
         session.modified = True
     return render_template('new-list.html', current_user=current_user, list_name=session['list_name'],
                            item_form=item_form, tasks=session['list_items'])
+
 
 
 # Route for saving a new list

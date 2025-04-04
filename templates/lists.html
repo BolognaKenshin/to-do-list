@@ -1,12 +1,17 @@
 {% include 'header.html' %}
 
-<main>
-        <h1>This page will show all lists!</h1>
-        {% for list in current_user.list_names %}
-        <div>
-                <h2>{{ list.list_name }}</h2>
+<main id="all-lists-main">
+        <h1 id="all-lists-headline">This page will show all lists!</h1>
+
+        <div id="list-card-holder">
+                {% for list in current_user.list_names %}
+                <div class="list-card">
+                        <h2>{{ list.list_name }}</h2>
+                        <a class="edit-pencil" href="{{ url_for('edit_list', list_url_id=list.list_url_id) }}"><i class="bi bi-pencil-square"></i></a>
+                </div>
+                {% endfor %}
         </div>
-        {% endfor %}
+
 </main>
 
 {% include 'footer.html' %}
