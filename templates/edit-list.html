@@ -1,0 +1,28 @@
+{% include 'header.html' %} {% from "bootstrap5/form.html" import render_form %}
+
+<main id="new-list-main">
+    <div id="list-name-bar">
+        {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+        <p class="flash">{{ message }}</p>
+        {% endfor %}
+        {% endwith %}
+
+        <p class="list-name">{{ list_name }} <i class="bi bi-pencil-square name-pencil"></i></p>
+
+        <button id="save-button" onclick="window.location.href='{{ url_for('save_new_list') }}'">Save</button>
+    </div>
+    <div id="list-item-bar">
+        {{ render_form(item_form, novalidate=True) }}
+    </div>
+
+    <div id="tasks-container">
+        {% for task in tasks %}
+        <div class="task-div">
+            <p>{{ task }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</main>
+
+{% include 'footer.html' %}

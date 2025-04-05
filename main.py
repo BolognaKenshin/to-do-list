@@ -136,6 +136,7 @@ def logout():
 # Route for displaying all lists user has generated
 @app.route("/all")
 def all_lists():
+    session['list_items'] = []
     return render_template("lists.html", current_user=current_user)
 
 # Generated page for naming the list - Checks if the name exists before letting you submit and go to new_list()
@@ -173,26 +174,22 @@ def new_list():
                            item_form=item_form,
                            tasks=displayed_items)
 
+
 # Page for editing an existing list - Add new items - Rename list
-@app.route("/edit-new-list", methods=["GET", "POST"])
-def edit_new_list():
-    item_form = ToDoItemForm()
-    if item_form.validate_on_submit():
-        new_item = {"task": item_form.task.data}
-        session['list_items'].append(new_item)
-        session.modified = True
-    return render_template('new-list.html', current_user=current_user, list_name=session['list_name'],
-                           item_form=item_form, tasks=session['list_items'])
-
-
 @app.route("/edit-list/<list_url_id>", methods=["GET", "POST"])
-def edit_list():
+def edit_list(list_url_id):
     item_form = ToDoItemForm()
+    list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
+    displayed_items = []
+    for task in list_to_edit.list_items:
+        session['list_items'].append(task.item)
+
     if item_form.validate_on_submit():
         new_item = {"task": item_form.task.data}
-        session['list_items'].append(new_item)
+        session['list_items'].append(new_item['task'])
         session.modified = True
-    return render_template('new-list.html', current_user=current_user, list_name=session['list_name'],
+    print(session['list_items'])
+    return render_template('edit-list.html', current_user=current_user, list_name=list_to_edit.list_name,
                            item_form=item_form, tasks=session['list_items'])
 
 
