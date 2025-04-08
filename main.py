@@ -199,8 +199,8 @@ def edit_list(list_url_id):
 def save_new_list():
     is_new_list = request.args.get('new_list')
     l_name = session['list_name']
+    # If a new list is being saved, variable is defined from 'new-list.html'
     if is_new_list == "True":
-        print('new list!')
         session['list_url_id'] = generate_url_id()
         l_url_id = session['list_url_id']
         new_list_name = ListName(
@@ -219,11 +219,13 @@ def save_new_list():
             )
             db.session.add(new_item)
             save_index += 1
+    # If new_list is "False," which is set in 'edit-list.html'
     else:
         list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == session['list_url_id'])).scalar()
         list_to_edit.list_name = session['list_name']
         save_index = 1
         for i in range(len(session['list_items'])):
+            # To catch if there are more tasks being saved to an existing list
             if i < len(list_to_edit.list_items):
                 item = list_to_edit.list_items[i]
                 item.item = session['list_items'][i]
