@@ -180,15 +180,15 @@ def new_list():
 def edit_list(list_url_id):
     item_form = ToDoItemForm()
     list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
-    displayed_items = []
+    session['list_url_id'] = list_url_id
+    session['list_name'] = list_to_edit.list_name
+    session['list_items'] = []
     for task in list_to_edit.list_items:
         session['list_items'].append(task.item)
-
     if item_form.validate_on_submit():
         new_item = {"task": item_form.task.data}
         session['list_items'].append(new_item['task'])
         session.modified = True
-    print(session['list_items'])
     return render_template('edit-list.html', current_user=current_user, list_name=list_to_edit.list_name,
                            item_form=item_form, tasks=session['list_items'])
 
@@ -197,25 +197,46 @@ def edit_list(list_url_id):
 # Route for saving a new list
 @app.route("/save-new-list", methods=["GET", "POST"])
 def save_new_list():
-    session['list_url_id'] = generate_url_id()
+    is_new_list = request.args.get('new_list')
     l_name = session['list_name']
-    l_url_id = session['list_url_id']
-    new_list_name = ListName(
-        list_name=l_name,
-        list_url_id=l_url_id,
-    )
-    current_user.list_names.append(new_list_name)
-
-    # Save index is to properly reference ascending item names (item 1, item 2, item 3)
-    save_index = 1
-    for item in session['list_items']:
-        new_item = ToDoItem(
-            item=item[f'item {save_index}']['task'],
-            list_name=new_list_name,
-            order_num=save_index
+    if is_new_list == "True":
+        print('new list!')
+        session['list_url_id'] = generate_url_id()
+        l_url_id = session['list_url_id']
+        new_list_name = ListName(
+            list_name=l_name,
+            list_url_id=l_url_id,
         )
-        db.session.add(new_item)
-        save_index += 1
+        current_user.list_names.append(new_list_name)
+
+        # Save index is to properly reference ascending item names (item 1, item 2, item 3)
+        save_index = 1
+        for item in session['list_items']:
+            new_item = ToDoItem(
+                item=item[f'item {save_index}']['task'],
+                list_name=new_list_name,
+                order_num=save_index
+            )
+            db.session.add(new_item)
+            save_index += 1
+    else:
+        list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == session['list_url_id'])).scalar()
+        list_to_edit.list_name = session['list_name']
+        save_index = 1
+        for i in range(len(session['list_items'])):
+            if i < len(list_to_edit.list_items):
+                item = list_to_edit.list_items[i]
+                item.item = session['list_items'][i]
+                save_index += 1
+            else:
+
+                new_item = ToDoItem(
+                    item=session['list_items'][i],
+                    list_name=list_to_edit,
+                    order_num=save_index
+                )
+                db.session.add(new_item)
+                save_index += 1
 
     db.session.commit()
     return redirect(url_for("all_lists", current_user=current_user))

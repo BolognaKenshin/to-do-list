@@ -10,7 +10,7 @@
 
         <p class="list-name">{{ list_name }} <i class="bi bi-pencil-square name-pencil"></i></p>
 
-        <button id="save-button" onclick="window.location.href='{{ url_for('save_new_list') }}'">Save</button>
+        <button id="save-button" onclick="window.location.href='{{ url_for('save_new_list', new_list=False) }}'">Save</button>
     </div>
     <div id="list-item-bar">
         {{ render_form(item_form, novalidate=True) }}
