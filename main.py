@@ -52,7 +52,7 @@ class ListName(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     list_name: Mapped[str] = mapped_column(String(250), nullable=False)
     list_users: Mapped[List['Users']] = relationship(secondary=relationships_table, back_populates="list_names")
-    list_items: Mapped[List['ToDoItem']] = relationship()
+    list_items: Mapped[List['ToDoItem']] = relationship(cascade="all, delete-orphan")
     list_url_id: Mapped[str] = mapped_column(String(), nullable=False, unique=True)
 
 # Pulled via relationship with list name
@@ -143,17 +143,29 @@ def all_lists():
 # List name is stored in flask session
 @app.route("/name-list", methods=["GET", "POST"])
 def name_list():
+    rename = request.args.get('rename')
     name_form = ToDoNameForm()
     session['list_items'] = []
     if name_form.validate_on_submit():
         l_name = name_form.to_do_name.data
         # Check for if user already has a list with the same name
         if not any(l_name == list_name.list_name for list_name in current_user.list_names):
-            session['list_name'] = name_form.to_do_name.data
-            return redirect(url_for('new_list'))
+
+            # Checking if a list is being renamed or if a new list is being made via 'rename' variable from 'edit-list.html'
+            if not rename == 'rename':
+                session['list_name'] = name_form.to_do_name.data
+                return redirect(url_for('new_list'))
+
+            else:
+                list_url_id = request.args.get('url_id')
+                list_to_rename = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
+                list_to_rename.list_name = l_name
+                db.session.commit()
+                return redirect(url_for('edit_list', list_url_id=list_url_id))
+
         else:
-            flash("There is another list with that name registered to your account.")
-    return render_template('name-list.html', current_user=current_user, name_form=name_form)
+                flash("There is another list with that name registered to your account.")
+    return render_template('name-list.html', current_user=current_user, name_form=name_form, rename=rename)
 
 # Generated after naming your list, lets you create to-do items - Stores them in flask session
 @app.route("/new-list", methods=["GET", "POST"])
@@ -189,7 +201,7 @@ def edit_list(list_url_id):
         new_item = {"task": item_form.task.data}
         session['list_items'].append(new_item['task'])
         session.modified = True
-    return render_template('edit-list.html', current_user=current_user, list_name=list_to_edit.list_name,
+    return render_template('edit-list.html', current_user=current_user, list=list_to_edit,
                            item_form=item_form, tasks=session['list_items'])
 
 
@@ -229,6 +241,7 @@ def save_new_list():
             if i < len(list_to_edit.list_items):
                 item = list_to_edit.list_items[i]
                 item.item = session['list_items'][i]
+                item.order_num = save_index
                 save_index += 1
             else:
 
@@ -243,6 +256,14 @@ def save_new_list():
     db.session.commit()
     return redirect(url_for("all_lists", current_user=current_user))
 
+# Deletes parent ListName and ToDoItems children along with it via cascade defined in relationship
+@app.route("/delete-list", methods=["GET"])
+def delete_list():
+    list_id = request.args.get('list_name_id')
+    list_to_delete = db.get_or_404(ListName, list_id)
+    db.session.delete(list_to_delete)
+    db.session.commit()
+    return redirect(url_for('all_lists'))
 
 if __name__ == "__main__":
     app.run(debug=True)

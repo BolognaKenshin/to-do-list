@@ -8,9 +8,9 @@
         {% endfor %}
         {% endwith %}
 
-        <p class="list-name">{{ list_name }} <i class="bi bi-pencil-square name-pencil"></i></p>
+        <p class="list-name">{{ list.list_name }} <a href="{{ url_for('name_list', rename='rename', url_id=list.list_url_id) }}"><i class="bi bi-pencil-square name-pencil"></i></a></p>
 
-        <button id="save-button" onclick="window.location.href='{{ url_for('save_new_list', new_list=False) }}'">Save</button>
+        <button type="button" id="save-button" onclick="window.location.href='{{ url_for('save_new_list', new_list=False) }}'">Save</button>
     </div>
     <div id="list-item-bar">
         {{ render_form(item_form, novalidate=True) }}

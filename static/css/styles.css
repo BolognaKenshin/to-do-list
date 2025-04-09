@@ -11,6 +11,11 @@ a {
     display: block;
 }
 
+.popover {
+    height: 200px;
+    width: 200px;
+}
+
 .form {
     width: 400px;
 }
