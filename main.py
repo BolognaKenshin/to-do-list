@@ -7,7 +7,7 @@ import os
 import random
 import string
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Table
+from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Table
 from typing import List
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -63,6 +63,8 @@ class ToDoItem(db.Model):
     list_name = relationship('ListName', back_populates='list_items')
     list_name_id: Mapped[int] = mapped_column(ForeignKey('list_names.id'))
     order_num: Mapped[int] = mapped_column(Integer, nullable=False)
+    # color: Mapped[str] = mapped_column(String)
+    # is_important: Mapped[bool] = mapped_column(Boolean)
 
 with app.app_context():
     db.create_all()
@@ -173,42 +175,47 @@ def new_list():
     item_form = ToDoItemForm()
     displayed_items = []
     if item_form.validate_on_submit():
-        new_item = {f"item {len(session['list_items']) + 1}": {"task": item_form.task.data}}
+        new_item = item_form.task.data
         session['list_items'].append(new_item)
         session.modified = True
-        index = 1
-        for item in session['list_items']:
-            displayed_items.append(item[f'item {index}']['task'])
-            index += 1
     return render_template('new-list.html',
                            current_user=current_user,
                            list_name=session['list_name'],
                            item_form=item_form,
-                           tasks=displayed_items)
+                           tasks=session['list_items'])
 
 
 # Page for editing an existing list - Add new items - Rename list
-@app.route("/edit-list/<list_url_id>", methods=["GET", "POST"])
-def edit_list(list_url_id):
+@app.route("/edit-list/<list_url_id>/<first_access>", methods=["GET", "POST"])
+def edit_list(list_url_id, first_access):
     item_form = ToDoItemForm()
     list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
-    session['list_url_id'] = list_url_id
-    session['list_name'] = list_to_edit.list_name
-    session['list_items'] = []
-    for task in list_to_edit.list_items:
-        session['list_items'].append(task.item)
-    if item_form.validate_on_submit():
-        new_item = {"task": item_form.task.data}
-        session['list_items'].append(new_item['task'])
-        session.modified = True
+    if first_access == "True":
+        print("First access!")
+        session['list_url_id'] = list_url_id
+        session['list_name'] = list_to_edit.list_name
+        session['list_items'] = []
+
+        for task in list_to_edit.list_items:
+            session['list_items'].append(task.item)
+
+        if item_form.validate_on_submit():
+            new_item = {"task": item_form.task.data}
+            session['list_items'].append(new_item['task'])
+            session.modified = True
+    else:
+        print("Not first access!")
+
     return render_template('edit-list.html', current_user=current_user, list=list_to_edit,
                            item_form=item_form, tasks=session['list_items'])
 
 
 
+
+
 # Route for saving a new list
-@app.route("/save-new-list", methods=["GET", "POST"])
-def save_new_list():
+@app.route("/save-list", methods=["GET", "POST"])
+def save_list():
     is_new_list = request.args.get('new_list')
     l_name = session['list_name']
     # If a new list is being saved, variable is defined from 'new-list.html'
@@ -264,6 +271,37 @@ def delete_list():
     db.session.delete(list_to_delete)
     db.session.commit()
     return redirect(url_for('all_lists'))
+
+
+def change_color():
+    pass
+
+def change_importance():
+    pass
+
+@app.route("/delete-task", methods=["GET"])
+def delete_task():
+    is_new_list = request.args.get('new_list')
+    print(is_new_list)
+    item_form = ToDoItemForm()
+    if is_new_list == "True":
+        print(session['list_items'])
+        task = request.args.get('task')
+        print(task)
+        session['list_items'].remove(task)
+        session.modified = True
+
+        return redirect(url_for('new_list', current_user=current_user,
+                               list_name=session['list_name'],
+                               item_form=item_form,
+                               tasks=session['list_items']))
+    else:
+        list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == session['list_url_id'])).scalar()
+        task = request.args.get('task')
+        session['list_items'].remove(task)
+        session.modified = True
+        print(session['list_items'])
+        return redirect(url_for('edit_list', list_url_id=session['list_url_id'],  first_access=False))
 
 if __name__ == "__main__":
     app.run(debug=True)
