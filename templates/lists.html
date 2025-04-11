@@ -8,7 +8,7 @@
                 {% for list in current_user.list_names %}
                 <div class="list-card">
                         <h2>{{ list.list_name }}</h2>
-                        <a href="{{ url_for('edit_list', list_url_id=list.list_url_id, first_access=True) }}"><i class="bi bi-pencil-square"></i></a>
+                        <a href="{{ url_for('edit_list', list_url_id=list.list_url_id) }}"><i class="bi bi-pencil-square"></i></a>
                         <button type="button" class="btn btn-secondary delete-list-btn" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="<p>Delete this list?</p>
                                 <form action='/delete-list' methods='DELETE'>
                                         <input type='hidden' name='list_name_id' value='{{ list.id }}'>

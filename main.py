@@ -139,6 +139,7 @@ def logout():
 @app.route("/all")
 def all_lists():
     session['list_items'] = []
+    session['first_access'] = True
     return render_template("lists.html", current_user=current_user)
 
 # Generated page for naming the list - Checks if the name exists before letting you submit and go to new_list()
@@ -186,12 +187,12 @@ def new_list():
 
 
 # Page for editing an existing list - Add new items - Rename list
-@app.route("/edit-list/<list_url_id>/<first_access>", methods=["GET", "POST"])
-def edit_list(list_url_id, first_access):
+@app.route("/edit-list/<list_url_id>", methods=["GET", "POST"])
+def edit_list(list_url_id, first_access=True):
     item_form = ToDoItemForm()
     list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
-    if first_access == "True":
-        print("First access!")
+    if session['first_access'] == True:
+        session['first_access'] = False
         session['list_url_id'] = list_url_id
         session['list_name'] = list_to_edit.list_name
         session['list_items'] = []
@@ -199,12 +200,10 @@ def edit_list(list_url_id, first_access):
         for task in list_to_edit.list_items:
             session['list_items'].append(task.item)
 
-        if item_form.validate_on_submit():
-            new_item = {"task": item_form.task.data}
-            session['list_items'].append(new_item['task'])
-            session.modified = True
-    else:
-        print("Not first access!")
+    if item_form.validate_on_submit():
+        new_item = {"task": item_form.task.data}
+        session['list_items'].append(new_item['task'])
+        session.modified = True
 
     return render_template('edit-list.html', current_user=current_user, list=list_to_edit,
                            item_form=item_form, tasks=session['list_items'])
@@ -232,7 +231,7 @@ def save_list():
         save_index = 1
         for item in session['list_items']:
             new_item = ToDoItem(
-                item=item[f'item {save_index}']['task'],
+                item=item,
                 list_name=new_list_name,
                 order_num=save_index
             )
@@ -242,6 +241,13 @@ def save_list():
     else:
         list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == session['list_url_id'])).scalar()
         list_to_edit.list_name = session['list_name']
+        # This section triggers when saving a list after deleting items.
+        if len(list_to_edit.list_items) > len(session['list_items']):
+            for i in range(len(list_to_edit.list_items)):
+                if i < len(session['list_items']):
+                    continue
+                else:
+                    db.session.delete(list_to_edit.list_items[i])
         save_index = 1
         for i in range(len(session['list_items'])):
             # To catch if there are more tasks being saved to an existing list
@@ -282,12 +288,9 @@ def change_importance():
 @app.route("/delete-task", methods=["GET"])
 def delete_task():
     is_new_list = request.args.get('new_list')
-    print(is_new_list)
     item_form = ToDoItemForm()
     if is_new_list == "True":
-        print(session['list_items'])
         task = request.args.get('task')
-        print(task)
         session['list_items'].remove(task)
         session.modified = True
 
@@ -300,7 +303,6 @@ def delete_task():
         task = request.args.get('task')
         session['list_items'].remove(task)
         session.modified = True
-        print(session['list_items'])
         return redirect(url_for('edit_list', list_url_id=session['list_url_id'],  first_access=False))
 
 if __name__ == "__main__":
