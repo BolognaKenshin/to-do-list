@@ -283,10 +283,34 @@ i.bi-card-checklist {
     margin-right: 10px;
 }
 
+i.bi-check {
+    font-size: 2.5rem;
+    line-height: 1;
+    color: rgb(209, 203, 203);
+}
+
+
+i.bi-check:hover{
+    color: #10486d;
+}
+
+i.bi-check-complete {
+    color: #10486d
+}
+
+i.bi-exclamation-circle {
+    color: rgb(209, 203, 203);
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+i.bi-exclamation-circle:hover {
+    color: red;
+}
+
 i.bi-trash3 {
     color: black;
     line-height: 1;
-    margin: 10px;
 }
 
 
@@ -300,4 +324,14 @@ i.name-pencil {
     color: white;
     line-height: 1;
     margin: 10px;
+}
+
+.task-button {
+    align-items: center;
+    border: none;
+    display: flex;
+    border-width: 1;
+    background-color: white;
+    justify-content: center;
+    padding: 0;
 }

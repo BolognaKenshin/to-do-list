@@ -63,8 +63,8 @@ class ToDoItem(db.Model):
     list_name = relationship('ListName', back_populates='list_items')
     list_name_id: Mapped[int] = mapped_column(ForeignKey('list_names.id'))
     order_num: Mapped[int] = mapped_column(Integer, nullable=False)
-    # color: Mapped[str] = mapped_column(String)
-    # is_important: Mapped[bool] = mapped_column(Boolean)
+    is_important: Mapped[bool] = mapped_column(Boolean)
+    is_done: Mapped[bool] = mapped_column(Boolean)
 
 with app.app_context():
     db.create_all()
@@ -174,9 +174,10 @@ def name_list():
 @app.route("/new-list", methods=["GET", "POST"])
 def new_list():
     item_form = ToDoItemForm()
-    displayed_items = []
     if item_form.validate_on_submit():
-        new_item = item_form.task.data
+        new_item = {"task":item_form.task.data,
+                    "importance": False,
+                    "finished": False,}
         session['list_items'].append(new_item)
         session.modified = True
     return render_template('new-list.html',
@@ -196,14 +197,18 @@ def edit_list(list_url_id, first_access=True):
         session['list_url_id'] = list_url_id
         session['list_name'] = list_to_edit.list_name
         session['list_items'] = []
-
         for task in list_to_edit.list_items:
-            session['list_items'].append(task.item)
-
+            item = {"task": task.item,
+                    "importance": task.is_important,
+                    "finished": task.is_done}
+            session['list_items'].append(item)
     if item_form.validate_on_submit():
-        new_item = {"task": item_form.task.data}
-        session['list_items'].append(new_item['task'])
+        new_item = {"task":item_form.task.data,
+                    "importance": False,
+                    "finished": False,}
+        session['list_items'].append(new_item)
         session.modified = True
+
 
     return render_template('edit-list.html', current_user=current_user, list=list_to_edit,
                            item_form=item_form, tasks=session['list_items'])
@@ -231,9 +236,11 @@ def save_list():
         save_index = 1
         for item in session['list_items']:
             new_item = ToDoItem(
-                item=item,
+                item=item['task'],
                 list_name=new_list_name,
-                order_num=save_index
+                order_num=save_index,
+                is_important=False,
+                is_done=False,
             )
             db.session.add(new_item)
             save_index += 1
@@ -253,15 +260,19 @@ def save_list():
             # To catch if there are more tasks being saved to an existing list
             if i < len(list_to_edit.list_items):
                 item = list_to_edit.list_items[i]
-                item.item = session['list_items'][i]
+                item.item = session['list_items'][i]['task']
+                item.is_important= session['list_items'][i]['importance']
+                item.is_done = session['list_items'][i]['finished']
                 item.order_num = save_index
                 save_index += 1
             else:
 
                 new_item = ToDoItem(
-                    item=session['list_items'][i],
+                    item=session['list_items'][i]['task'],
                     list_name=list_to_edit,
-                    order_num=save_index
+                    order_num=save_index,
+                    is_important=session['list_items'][i]['importance'],
+                    is_done=session['list_items'][i]['finished']
                 )
                 db.session.add(new_item)
                 save_index += 1
@@ -278,20 +289,20 @@ def delete_list():
     db.session.commit()
     return redirect(url_for('all_lists'))
 
-
-def change_color():
-    pass
-
+@app.route("/change-importance")
 def change_importance():
-    pass
+    print("Importance logic will go here!")
+    task_index = request.args.get('task_index')
+    print(task_index)
+    return redirect(url_for('edit_list', list_url_id=session['list_url_id'], first_access=False))
 
 @app.route("/delete-task", methods=["GET"])
 def delete_task():
     is_new_list = request.args.get('new_list')
     item_form = ToDoItemForm()
     if is_new_list == "True":
-        task = request.args.get('task')
-        session['list_items'].remove(task)
+        task_index = int(request.args.get('task_index'))
+        session['list_items'].pop(task_index)
         session.modified = True
 
         return redirect(url_for('new_list', current_user=current_user,
@@ -300,10 +311,23 @@ def delete_task():
                                tasks=session['list_items']))
     else:
         list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == session['list_url_id'])).scalar()
-        task = request.args.get('task')
-        session['list_items'].remove(task)
+        task_index = int(request.args.get('task_index'))
+        session['list_items'].pop(task_index)
         session.modified = True
         return redirect(url_for('edit_list', list_url_id=session['list_url_id'],  first_access=False))
+
+@app.route("/task-done")
+def mark_as_completed():
+   task_index = int(request.args.get('task_index'))
+   print(session['list_items'][task_index]['finished'])
+   print(type(session['list_items'][task_index]['finished']))
+   if session['list_items'][task_index]['finished'] == False:
+       print("False!")
+       session['list_items'][task_index]['finished'] = True
+   else:
+       session['list_items'][task_index]['finished'] = False
+   session.modified=True
+   return redirect(url_for('edit_list', list_url_id=session['list_url_id'], first_access=False))
 
 if __name__ == "__main__":
     app.run(debug=True)
