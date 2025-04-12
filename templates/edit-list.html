@@ -17,21 +17,49 @@
     </div>
 
     <div id="tasks-container">
+
+        {% for task in tasks|selectattr('importance', 'equalto', True) %}
+            {% if not task['finished'] %}
+                <div class="task-div">
+                    <button type="button" class="task-button" onclick="window.location.href='{{ url_for('mark_as_completed', task_index=tasks.index(task)) }}'" ><i class="bi bi-check"></i></button>
+                    <p>{{ task['task'] }}</p>
+                    <button type="button" class="task-button" onclick="window.location.href='{{ url_for('change_importance', task_index=tasks.index(task)) }}'"><i class="bi bi-exclamation-circle important"></i></button>
+                    <button type="button" class="task-button" onclick="window.location.href='{{ url_for('delete_task', new_list=False, task_index=tasks.index(task)) }}'"><i class="bi bi-trash3"></i></button>
+                </div>
+            {% endif %}
+        {% endfor %}
+
         {% for task in tasks|selectattr('finished', 'equalto', False) %}
+            {% if task['importance'] == False %}
+                <div class="task-div">
+                    <button type="button" class="task-button" onclick="window.location.href='{{ url_for('mark_as_completed', task_index=tasks.index(task)) }}'" ><i class="bi bi-check"></i></button>
+                    <p>{{ task['task'] }}</p>
+                    <button type="button" class="task-button" onclick="window.location.href='{{ url_for('change_importance', task_index=tasks.index(task)) }}'"><i class="bi bi-exclamation-circle"></i></button>
+                    <button type="button" class="task-button" onclick="window.location.href='{{ url_for('delete_task', new_list=False, task_index=tasks.index(task)) }}'"><i class="bi bi-trash3"></i></button>
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        {% set finished_tasks = tasks|selectattr('finished', 'equalto', True) %}
+        {% set copy_finished_tasks = tasks|selectattr('finished', 'equalto', True) %}
+        {% set important_finished = finished_tasks|selectattr('importance','equalto', True) %}
+        {% set unimportant_finished = copy_finished_tasks|selectattr('importance','equalto', False) %}
+
+        {% for task in important_finished %}
             <div class="task-div">
-                <button type="button" class="task-button" onclick="window.location.href='{{ url_for('mark_as_completed', task_index=tasks.index(task)) }}'" ><i class="bi bi-check"></i></button>
-                <p>{{ task['task'] }}</p>
-                <button type="button" class="task-button" onclick="window.location.href='{{ url_for('change_importance', task_index=tasks.index(task)) }}'"><i class="bi bi-exclamation-circle"></i></button>
+                <button type="button" class="task-button" onclick="window.location.href='{{ url_for('mark_as_completed', task_index=tasks.index(task)) }}'" ><i class="bi bi-check bi-check-complete"></i></button>
+                <p><s>{{ task['task'] }}</s></p>
+                <button type="button" class="task-button" onclick="window.location.href='{{ url_for('change_importance', task_index=tasks.index(task)) }}'"><i class="bi bi-exclamation-circle important-done"></i></button>
                 <button type="button" class="task-button" onclick="window.location.href='{{ url_for('delete_task', new_list=False, task_index=tasks.index(task)) }}'"><i class="bi bi-trash3"></i></button>
             </div>
         {% endfor %}
 
-        {% for task in tasks|selectattr('finished', 'equalto', True) %}
+        {% for task in unimportant_finished %}
             <div class="task-div">
                 <button type="button" class="task-button" onclick="window.location.href='{{ url_for('mark_as_completed', task_index=tasks.index(task)) }}'" ><i class="bi bi-check bi-check-complete"></i></button>
                 <p><s>{{ task['task'] }}</s></p>
                 <button type="button" class="task-button" onclick="window.location.href='{{ url_for('change_importance', task_index=tasks.index(task)) }}'"><i class="bi bi-exclamation-circle"></i></button>
-                <button type="button" class="task-button" onclick="window.location.href='{{ url_for('delete_task', new_list=False, tasks_index=tasks.index(task)) }}'"><i class="bi bi-trash3"></i></button>
+                <button type="button" class="task-button" onclick="window.location.href='{{ url_for('delete_task', new_list=False, task_index=tasks.index(task)) }}'"><i class="bi bi-trash3"></i></button>
             </div>
         {% endfor %}
     </div>

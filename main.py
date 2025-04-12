@@ -291,9 +291,12 @@ def delete_list():
 
 @app.route("/change-importance")
 def change_importance():
-    print("Importance logic will go here!")
-    task_index = request.args.get('task_index')
-    print(task_index)
+    task_index = int(request.args.get('task_index'))
+    if session['list_items'][task_index]['importance'] == False:
+        session['list_items'][task_index]['importance'] = True
+    else:
+        session['list_items'][task_index]['importance'] = False
+    session.modified = True
     return redirect(url_for('edit_list', list_url_id=session['list_url_id'], first_access=False))
 
 @app.route("/delete-task", methods=["GET"])
@@ -319,10 +322,7 @@ def delete_task():
 @app.route("/task-done")
 def mark_as_completed():
    task_index = int(request.args.get('task_index'))
-   print(session['list_items'][task_index]['finished'])
-   print(type(session['list_items'][task_index]['finished']))
    if session['list_items'][task_index]['finished'] == False:
-       print("False!")
        session['list_items'][task_index]['finished'] = True
    else:
        session['list_items'][task_index]['finished'] = False

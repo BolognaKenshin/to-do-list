@@ -308,6 +308,14 @@ i.bi-exclamation-circle:hover {
     color: red;
 }
 
+i.important {
+    color: red;
+}
+
+i.important-done {
+    color: #10486d;
+}
+
 i.bi-trash3 {
     color: black;
     line-height: 1;
