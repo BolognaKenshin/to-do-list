@@ -16,11 +16,11 @@
         {{ render_form(item_form, novalidate=True) }}
     </div>
 
-    <div id="tasks-container">
+    <div id="tasks-container" class="sortable">
 
         {% for task in tasks|selectattr('importance', 'equalto', True) %}
             {% if not task['finished'] %}
-                <div class="task-div">
+                <div class="task-div" data-order="{{ task['order_num'] }}">
                     <button type="button" class="task-button" onclick="window.location.href='{{ url_for('mark_as_completed', task_index=tasks.index(task)) }}'" ><i class="bi bi-check"></i></button>
                     <p>{{ task['task'] }}</p>
                     <button type="button" class="task-button" onclick="window.location.href='{{ url_for('change_importance', task_index=tasks.index(task)) }}'"><i class="bi bi-exclamation-circle important"></i></button>
@@ -31,7 +31,7 @@
 
         {% for task in tasks|selectattr('finished', 'equalto', False) %}
             {% if task['importance'] == False %}
-                <div class="task-div">
+                <div class="task-div" data-order="{{ task['order_num'] }}">
                     <button type="button" class="task-button" onclick="window.location.href='{{ url_for('mark_as_completed', task_index=tasks.index(task)) }}'" ><i class="bi bi-check"></i></button>
                     <p>{{ task['task'] }}</p>
                     <button type="button" class="task-button" onclick="window.location.href='{{ url_for('change_importance', task_index=tasks.index(task)) }}'"><i class="bi bi-exclamation-circle"></i></button>
@@ -46,7 +46,7 @@
         {% set unimportant_finished = copy_finished_tasks|selectattr('importance','equalto', False) %}
 
         {% for task in important_finished %}
-            <div class="task-div">
+            <div class="task-div" data-order="{{ task['order_num'] }}">
                 <button type="button" class="task-button" onclick="window.location.href='{{ url_for('mark_as_completed', task_index=tasks.index(task)) }}'" ><i class="bi bi-check bi-check-complete"></i></button>
                 <p><s>{{ task['task'] }}</s></p>
                 <button type="button" class="task-button" onclick="window.location.href='{{ url_for('change_importance', task_index=tasks.index(task)) }}'"><i class="bi bi-exclamation-circle important-done"></i></button>
@@ -55,7 +55,7 @@
         {% endfor %}
 
         {% for task in unimportant_finished %}
-            <div class="task-div">
+            <div class="task-div" data-order="{{ task['order_num'] }}">
                 <button type="button" class="task-button" onclick="window.location.href='{{ url_for('mark_as_completed', task_index=tasks.index(task)) }}'" ><i class="bi bi-check bi-check-complete"></i></button>
                 <p><s>{{ task['task'] }}</s></p>
                 <button type="button" class="task-button" onclick="window.location.href='{{ url_for('change_importance', task_index=tasks.index(task)) }}'"><i class="bi bi-exclamation-circle"></i></button>

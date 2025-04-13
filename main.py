@@ -189,7 +189,7 @@ def new_list():
 
 # Page for editing an existing list - Add new items - Rename list
 @app.route("/edit-list/<list_url_id>", methods=["GET", "POST"])
-def edit_list(list_url_id, first_access=True):
+def edit_list(list_url_id):
     item_form = ToDoItemForm()
     list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
     if session['first_access'] == True:
@@ -200,15 +200,16 @@ def edit_list(list_url_id, first_access=True):
         for task in list_to_edit.list_items:
             item = {"task": task.item,
                     "importance": task.is_important,
-                    "finished": task.is_done}
+                    "finished": task.is_done,
+                    "order_num": task.order_num,}
             session['list_items'].append(item)
     if item_form.validate_on_submit():
         new_item = {"task":item_form.task.data,
+                    "order_num": len(session['list_items']),
                     "importance": False,
                     "finished": False,}
         session['list_items'].append(new_item)
         session.modified = True
-
 
     return render_template('edit-list.html', current_user=current_user, list=list_to_edit,
                            item_form=item_form, tasks=session['list_items'])
@@ -233,7 +234,7 @@ def save_list():
         current_user.list_names.append(new_list_name)
 
         # Save index is to properly reference ascending item names (item 1, item 2, item 3)
-        save_index = 1
+        save_index = 0
         for item in session['list_items']:
             new_item = ToDoItem(
                 item=item['task'],
@@ -255,7 +256,6 @@ def save_list():
                     continue
                 else:
                     db.session.delete(list_to_edit.list_items[i])
-        save_index = 1
         for i in range(len(session['list_items'])):
             # To catch if there are more tasks being saved to an existing list
             if i < len(list_to_edit.list_items):
@@ -263,19 +263,17 @@ def save_list():
                 item.item = session['list_items'][i]['task']
                 item.is_important= session['list_items'][i]['importance']
                 item.is_done = session['list_items'][i]['finished']
-                item.order_num = save_index
-                save_index += 1
+                item.order_num = session['list_items'][i]['order_num']
             else:
-
                 new_item = ToDoItem(
                     item=session['list_items'][i]['task'],
                     list_name=list_to_edit,
-                    order_num=save_index,
+                    order_num=session['list_items'][i]['order_num'],
                     is_important=session['list_items'][i]['importance'],
                     is_done=session['list_items'][i]['finished']
                 )
                 db.session.add(new_item)
-                save_index += 1
+
 
     db.session.commit()
     return redirect(url_for("all_lists", current_user=current_user))
@@ -328,6 +326,28 @@ def mark_as_completed():
        session['list_items'][task_index]['finished'] = False
    session.modified=True
    return redirect(url_for('edit_list', list_url_id=session['list_url_id'], first_access=False))
+
+@app.route('/update_task_order', methods=['POST'])
+def update_task_order():
+    data = request.get_json()
+    new_order = []
+    task_order = data.get('task_order', [])
+    print(task_order)
+    for task_index in task_order:
+        for item in session['list_items']:
+            if int(task_index) == item['order_num']:
+                print(f'{item['task']} is a match!')
+                new_order.append(item)
+                session['list_items'].remove(item)
+
+    session['list_items'] = new_order
+    for task in session['list_items']:
+        print(task)
+
+    # for item in session['list_items']:
+    #     print(item)
+
+    return redirect(url_for('edit_list', list_url_id=session['list_url_id'], first_access=False))
 
 if __name__ == "__main__":
     app.run(debug=True)

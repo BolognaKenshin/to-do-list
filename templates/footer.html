@@ -7,6 +7,8 @@
             </div>
         </footer>
         {{ bootstrap.load_js() }}
+        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
@@ -14,6 +16,33 @@
                 return new bootstrap.Popover(popoverTriggerEl, {html: true, sanitize: false});
                 });
                });
+
+
+            $("#tasks-container").sortable({
+                items: ".task-div",
+                placeholder: "sortable-placeholder",
+                update: function(event, ui) {
+                    var taskOrder = $(this).sortable("toArray", { attribute: "data-order" });
+                    $.ajax({
+                        url: '{{ url_for("update_task_order") }}',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ task_order: taskOrder }),
+                        success: function(response) {
+                            console.log('Order saved:', response);
+                        },
+                        error: function(error) {
+                            console.error('Error saving order:', error);
+                        }
+                    });
+                }
+            });
+
+            // Prevent buttons from triggering drag
+            $('.task-button').on('mousedown', function(e) {
+                e.stopPropagation();
+            });
         </script>
+
     </body>
 </html>

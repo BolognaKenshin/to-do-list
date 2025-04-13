@@ -256,6 +256,7 @@ nav {
     width: 100%;
     height: 250px;
     justify-content: center;
+    margin: 20px 0;
 }
 
 #top-bar-email {
