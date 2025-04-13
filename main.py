@@ -339,13 +339,7 @@ def update_task_order():
                 print(f'{item['task']} is a match!')
                 new_order.append(item)
                 session['list_items'].remove(item)
-
     session['list_items'] = new_order
-    for task in session['list_items']:
-        print(task)
-
-    # for item in session['list_items']:
-    #     print(item)
 
     return redirect(url_for('edit_list', list_url_id=session['list_url_id'], first_access=False))
 
