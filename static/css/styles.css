@@ -204,8 +204,12 @@ nav {
 }
 
 #tasks-container {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
     height: calc(100vh - 240px);
+    padding-top: 30px;
     width: 100%;
 }
 
@@ -245,7 +249,7 @@ nav {
     width: 80px;
 }
 
-.task-div{
+.task-div, .task-complete-div, .task-important-div{
     align-items: center;
     background-color: white;
     border-radius: 10px;
@@ -253,10 +257,10 @@ nav {
     border-style: solid;
     border-width: 5px;
     display: flex;
-    width: 100%;
-    height: 250px;
+    width: 60%;
+    min-height: 200px;
     justify-content: center;
-    margin: 20px 0;
+    margin: 30px 0;
 }
 
 #top-bar-email {
@@ -344,3 +348,10 @@ i.name-pencil {
     justify-content: center;
     padding: 0;
 }
+
+.sortable-placeholder {
+    background: #f0f0f0; /* Light background */
+    border: 1px dashed #ccc; /* Dashed border */
+    height: 50px; /* Match .task-div height */
+    margin: 5px 0; /* Match .task-div margins */
+    opacity: 0.5; /* Slight transparency */

@@ -42,6 +42,17 @@
             $('.task-button').on('mousedown', function(e) {
                 e.stopPropagation();
             });
+
+
+            document.addEventListener('DOMContentLoaded', () => {
+              setTimeout(() => {
+                const input = document.getElementById('task');
+                if (input) {
+                  input.value = '';
+                  input.focus();
+                }
+              }, 150); // tweak timing as needed
+            });
         </script>
 
     </body>

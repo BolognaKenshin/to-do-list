@@ -332,15 +332,18 @@ def update_task_order():
     data = request.get_json()
     new_order = []
     task_order = data.get('task_order', [])
-    print(task_order)
     for task_index in task_order:
-        for item in session['list_items']:
-            if int(task_index) == item['order_num']:
-                print(f'{item['task']} is a match!')
-                new_order.append(item)
-                session['list_items'].remove(item)
+        for task in session['list_items']:
+            if int(task_index) == task['order_num']:
+                print(f'{task['task']} is a match!')
+                new_order.append(task)
+                session['list_items'].remove(task)
+    for task in session['list_items']:
+        if task['finished']:
+            new_order.append(task)
+        elif task['importance']:
+            new_order.insert(0, task)
     session['list_items'] = new_order
-
     return redirect(url_for('edit_list', list_url_id=session['list_url_id'], first_access=False))
 
 if __name__ == "__main__":
