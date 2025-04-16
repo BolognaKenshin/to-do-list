@@ -131,6 +131,10 @@ html, body {
     text-align: center;
 }
 
+.list-card.done {
+    color: rgb(209, 203, 203);
+}
+
 #list-card-holder {
     display: flex;
     flex-wrap: wrap;

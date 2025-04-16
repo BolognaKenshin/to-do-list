@@ -139,8 +139,15 @@ def logout():
 @app.route("/all")
 def all_lists():
     session['list_items'] = []
+    ongoing_lists = []
+    finished_lists = []
     session['first_access'] = True
-    return render_template("lists.html", current_user=current_user)
+    for list in current_user.list_names:
+        if not any(item.is_done == False for item in list.list_items):
+            finished_lists.append(list)
+        else:
+            ongoing_lists.append(list)
+    return render_template("lists.html", current_user=current_user, finished_lists=finished_lists, ongoing_lists=ongoing_lists)
 
 # Generated page for naming the list - Checks if the name exists before letting you submit and go to new_list()
 # List name is stored in flask session
@@ -315,7 +322,6 @@ def delete_task():
                                item_form=item_form,
                                tasks=session['list_items']))
     else:
-        list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == session['list_url_id'])).scalar()
         task_index = int(request.args.get('task_index'))
         session['list_items'].pop(task_index)
         session.modified = True
@@ -339,7 +345,6 @@ def update_task_order():
     for task_index in task_order:
         for task in session['list_items']:
             if int(task_index) == task['order_num']:
-                print(f'{task['task']} is a match!')
                 new_order.append(task)
                 session['list_items'].remove(task)
     for task in session['list_items']:
