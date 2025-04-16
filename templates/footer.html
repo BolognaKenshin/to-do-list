@@ -18,29 +18,36 @@
                });
 
 
-            $("#tasks-container").sortable({
-                items: ".task-div",
-                placeholder: "sortable-placeholder",
-                update: function(event, ui) {
-                    var taskOrder = $(this).sortable("toArray", { attribute: "data-order" });
-                    $.ajax({
-                        url: '{{ url_for("update_task_order") }}',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ task_order: taskOrder }),
-                        success: function(response) {
-                            console.log('Order saved:', response);
-                        },
-                        error: function(error) {
-                            console.error('Error saving order:', error);
-                        }
-                    });
-                }
-            });
+            $(document).ready(function() {
+                $("#tasks-container").sortable({
+                    items: ".task-div", // Only .task-div elements are sortable
+                    placeholder: "sortable-placeholder", // Placeholder class
+                    tolerance: "pointer", // Drop based on pointer position for precise insertion
+                    cursor: "move", // Show move cursor during drag
+                    opacity: 0.8, // Slight fade for dragged item
+                    forcePlaceholderSize: true, // Match placeholder size to dragged item
+                    axis: "y", // Restrict dragging to vertical axis for cleaner movement
+                    update: function(event, ui) {
+                        var taskOrder = $(this).sortable("toArray", { attribute: "data-order" });
+                        $.ajax({
+                            url: '{{ url_for("update_task_order") }}',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({ task_order: taskOrder }),
+                            success: function(response) {
+                                console.log('Order saved:', response);
+                            },
+                            error: function(error) {
+                                console.error('Error saving order:', error);
+                            }
+                        });
+                    }
+                });
 
-            // Prevent buttons from triggering drag
-            $('.task-button').on('mousedown', function(e) {
-                e.stopPropagation();
+                // Prevent buttons from triggering drag
+                $('.task-button').on('mousedown touchstart', function(e) {
+                    e.stopPropagation();
+                });
             });
 
 
