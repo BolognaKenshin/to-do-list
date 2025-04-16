@@ -241,7 +241,7 @@ nav {
     }
 }
 
-#save-button {
+#save-button, #share-button {
     border-radius: 10px;
     flex-shrink: 0;
     margin-left: auto;

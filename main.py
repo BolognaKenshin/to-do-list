@@ -210,9 +210,9 @@ def edit_list(list_url_id):
                     "finished": False,}
         session['list_items'].append(new_item)
         session.modified = True
-
+    current_url = request.url
     return render_template('edit-list.html', current_user=current_user, list=list_to_edit,
-                           item_form=item_form, tasks=session['list_items'])
+                           item_form=item_form, tasks=session['list_items'], current_url=current_url)
 
 
 
@@ -248,6 +248,11 @@ def save_list():
     # If new_list is "False," which is set in 'edit-list.html'
     else:
         list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == session['list_url_id'])).scalar()
+        if list_to_edit not in current_user.list_names:
+            db.session.execute(relationships_table.insert().values(
+                user_id=current_user.id,
+                list_name_id=list_to_edit.id,
+            ))
         list_to_edit.list_name = session['list_name']
         # This section triggers when saving a list after deleting items.
         if len(list_to_edit.list_items) > len(session['list_items']):
@@ -305,7 +310,6 @@ def delete_task():
         task_index = int(request.args.get('task_index'))
         session['list_items'].pop(task_index)
         session.modified = True
-
         return redirect(url_for('new_list', current_user=current_user,
                                list_name=session['list_name'],
                                item_form=item_form,
