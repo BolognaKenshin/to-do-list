@@ -3,6 +3,9 @@
 <main>
     <div id="new-user-div">
         <h1 id="new-user-h1">New User Registration</h1>
+        {% if error_message %}
+            <p class="error_message">{{ error_message }}</p>
+        {% endif %}
         {{ render_form(form, novalidate=True) }}
     </div>
 </main>

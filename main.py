@@ -93,42 +93,49 @@ def homepage():
 @app.route("/sign-up", methods=["GET", "POST"])
 def sign_up():
     form = NewUserForm()
+    error = request.args.get('error_message')
     if form.validate_on_submit():
-        result = db.session.execute(db.select(Users).where(Users.email == form.email.data))
-        user = result.scalar()
-        if user:
-            flash("An account using that email already exists.")
-            return redirect(url_for('log_in'))
-        hs_password = generate_password_hash(password=request.form.get('password'), method='pbkdf2:sha256', salt_length=8)
-
-        new_user = Users(
-            email = request.form.get('email'),
-            password = hs_password)
-
-        db.session.add(new_user)
-        db.session.commit()
-        login_user(new_user)
-        print('registered and logging in!')
-        return redirect(url_for('all_lists'))
-    return render_template("signup.html", form=form)
+        try:
+            result = db.session.execute(db.select(Users).where(Users.email == form.email.data))
+            user = result.scalar()
+            if user:
+                flash("An account using that email already exists.")
+                return redirect(url_for('log_in'))
+            hs_password = generate_password_hash(password=request.form.get('password'), method='pbkdf2:sha256', salt_length=8)
+            new_user = Users(
+                email = request.form.get('email'),
+                password = hs_password)
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+            return redirect(url_for('all_lists'))
+        except Exception:
+            e = "An unexpected error has occurred. Please try again."
+            return redirect(url_for('sign_up', error_message=e))
+    return render_template("signup.html", form=form, error_message=error)
 
 @app.route("/log-in", methods=["GET", "POST"])
 def log_in():
     form = LoginForm()
+    e = request.args.get('error_message')
     if form.validate_on_submit():
         email = request.form.get('email')
         password = request.form.get('password')
-        result = db.session.execute(db.select(Users).where(Users.email == email))
-        user = result.scalar()
-        if not user:
-            flash("No account exists under the provided email address.")
-        elif not check_password_hash(user.password, password):
-            flash("The password entered is invalid.")
-        else:
-            login_user(user)
-            print('logging in!')
-            return redirect(url_for('all_lists'))
-    return render_template("login.html", form=form)
+        try:
+            result = db.session.execute(db.select(Users).where(Users.email == email))
+            user = result.scalar()
+            if not user:
+                flash("No account exists under the provided email address.")
+            elif not check_password_hash(user.password, password):
+                flash("The password entered is invalid.")
+            else:
+                login_user(user)
+                print('logging in!')
+                return redirect(url_for('all_lists'))
+        except Exception:
+            e = "An unexpected error has occurred. Please try again."
+            return redirect(url_for('log_in', error_message=e))
+    return render_template("login.html", form=form, error_message=e)
 
 @app.route("/logout")
 def logout():
@@ -138,6 +145,7 @@ def logout():
 # Route for displaying all lists user has generated
 @app.route("/all")
 def all_lists():
+    error_message=request.args.get('error_message')
     session['list_items'] = []
     ongoing_lists = []
     finished_lists = []
@@ -147,7 +155,7 @@ def all_lists():
             finished_lists.append(list)
         else:
             ongoing_lists.append(list)
-    return render_template("lists.html", current_user=current_user, finished_lists=finished_lists, ongoing_lists=ongoing_lists)
+    return render_template("lists.html", current_user=current_user, finished_lists=finished_lists, ongoing_lists=ongoing_lists, error_message=error_message)
 
 # Generated page for naming the list - Checks if the name exists before letting you submit and go to new_list()
 # List name is stored in flask session
@@ -165,16 +173,16 @@ def name_list():
             if not rename == 'rename':
                 session['list_name'] = name_form.to_do_name.data
                 return redirect(url_for('new_list'))
-
             else:
                 list_url_id = request.args.get('url_id')
-                list_to_rename = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
-                list_to_rename.list_name = l_name
-                db.session.commit()
-                return redirect(url_for('edit_list', list_url_id=list_url_id))
-
-        else:
-                flash("There is another list with that name registered to your account.")
+                try:
+                    list_to_rename = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
+                    list_to_rename.list_name = l_name
+                    db.session.commit()
+                    return redirect(url_for('edit_list', list_url_id=list_url_id))
+                except Exception:
+                    error_message = "An unexpected error has occurred. Please try again"
+                    return redirect(url_for('all_lists', error_message=error_message))
     return render_template('name-list.html', current_user=current_user, name_form=name_form, rename=rename)
 
 # Generated after naming your list, lets you create to-do items - Stores them in flask session
@@ -198,31 +206,32 @@ def new_list():
 @app.route("/edit-list/<list_url_id>", methods=["GET", "POST"])
 def edit_list(list_url_id):
     item_form = ToDoItemForm()
-    list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
-    if session['first_access'] == True:
-        session['first_access'] = False
-        session['list_url_id'] = list_url_id
-        session['list_name'] = list_to_edit.list_name
-        session['list_items'] = []
-        for task in list_to_edit.list_items:
-            item = {"task": task.item,
-                    "importance": task.is_important,
-                    "finished": task.is_done,
-                    "order_num": task.order_num,}
-            session['list_items'].append(item)
-    if item_form.validate_on_submit():
-        new_item = {"task":item_form.task.data,
-                    "order_num": len(session['list_items']),
-                    "importance": False,
-                    "finished": False,}
-        session['list_items'].append(new_item)
-        session.modified = True
+    try:
+        list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
+        if session['first_access'] == True:
+            session['first_access'] = False
+            session['list_url_id'] = list_url_id
+            session['list_name'] = list_to_edit.list_name
+            session['list_items'] = []
+            for task in list_to_edit.list_items:
+                item = {"task": task.item,
+                        "importance": task.is_important,
+                        "finished": task.is_done,
+                        "order_num": task.order_num,}
+                session['list_items'].append(item)
+        if item_form.validate_on_submit():
+            new_item = {"task":item_form.task.data,
+                        "order_num": len(session['list_items']),
+                        "importance": False,
+                        "finished": False,}
+            session['list_items'].append(new_item)
+            session.modified = True
+    except Exception:
+        error_message = "An unexpected error has occurred. Please try again"
+        return redirect(url_for('all_lists', error_message=error_message))
     current_url = request.url
     return render_template('edit-list.html', current_user=current_user, list=list_to_edit,
                            item_form=item_form, tasks=session['list_items'], current_url=current_url)
-
-
-
 
 
 # Route for saving a new list
@@ -232,61 +241,67 @@ def save_list():
     l_name = session['list_name']
     # If a new list is being saved, variable is defined from 'new-list.html'
     if is_new_list == "True":
-        session['list_url_id'] = generate_url_id()
-        l_url_id = session['list_url_id']
-        new_list_name = ListName(
-            list_name=l_name,
-            list_url_id=l_url_id,
-        )
-        current_user.list_names.append(new_list_name)
-
-        # Save index is to properly reference ascending item names (item 1, item 2, item 3)
-        save_index = 0
-        for item in session['list_items']:
-            new_item = ToDoItem(
-                item=item['task'],
-                list_name=new_list_name,
-                order_num=save_index,
-                is_important=False,
-                is_done=False,
+        try:
+            session['list_url_id'] = generate_url_id()
+            l_url_id = session['list_url_id']
+            new_list_name = ListName(
+                list_name=l_name,
+                list_url_id=l_url_id,
             )
-            db.session.add(new_item)
-            save_index += 1
-    # If new_list is "False," which is set in 'edit-list.html'
-    else:
-        list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == session['list_url_id'])).scalar()
-        if list_to_edit not in current_user.list_names:
-            db.session.execute(relationships_table.insert().values(
-                user_id=current_user.id,
-                list_name_id=list_to_edit.id,
-            ))
-        list_to_edit.list_name = session['list_name']
-        # This section triggers when saving a list after deleting items.
-        if len(list_to_edit.list_items) > len(session['list_items']):
-            for i in range(len(list_to_edit.list_items)):
-                if i < len(session['list_items']):
-                    continue
-                else:
-                    db.session.delete(list_to_edit.list_items[i])
-        for i in range(len(session['list_items'])):
-            # To catch if there are more tasks being saved to an existing list
-            if i < len(list_to_edit.list_items):
-                item = list_to_edit.list_items[i]
-                item.item = session['list_items'][i]['task']
-                item.is_important= session['list_items'][i]['importance']
-                item.is_done = session['list_items'][i]['finished']
-                item.order_num = session['list_items'][i]['order_num']
-            else:
+            current_user.list_names.append(new_list_name)
+
+            # Save index is to properly reference ascending item names (item 1, item 2, item 3)
+            save_index = 0
+            for item in session['list_items']:
                 new_item = ToDoItem(
-                    item=session['list_items'][i]['task'],
-                    list_name=list_to_edit,
-                    order_num=session['list_items'][i]['order_num'],
-                    is_important=session['list_items'][i]['importance'],
-                    is_done=session['list_items'][i]['finished']
+                    item=item['task'],
+                    list_name=new_list_name,
+                    order_num=save_index,
+                    is_important=False,
+                    is_done=False,
                 )
                 db.session.add(new_item)
-
-
+                save_index += 1
+        except Exception:
+            error_message = "An unexpected error has occurred. Please try again"
+            return redirect(url_for('all_lists', error_message=error_message))
+    # If new_list is "False," which is set in 'edit-list.html'
+    else:
+        try:
+            list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == session['list_url_id'])).scalar()
+            if list_to_edit not in current_user.list_names:
+                db.session.execute(relationships_table.insert().values(
+                    user_id=current_user.id,
+                    list_name_id=list_to_edit.id,
+                ))
+            list_to_edit.list_name = session['list_name']
+            # This section triggers when saving a list after deleting items.
+            if len(list_to_edit.list_items) > len(session['list_items']):
+                for i in range(len(list_to_edit.list_items)):
+                    if i < len(session['list_items']):
+                        continue
+                    else:
+                        db.session.delete(list_to_edit.list_items[i])
+            for i in range(len(session['list_items'])):
+                # To catch if there are more tasks being saved to an existing list
+                if i < len(list_to_edit.list_items):
+                    item = list_to_edit.list_items[i]
+                    item.item = session['list_items'][i]['task']
+                    item.is_important= session['list_items'][i]['importance']
+                    item.is_done = session['list_items'][i]['finished']
+                    item.order_num = session['list_items'][i]['order_num']
+                else:
+                    new_item = ToDoItem(
+                        item=session['list_items'][i]['task'],
+                        list_name=list_to_edit,
+                        order_num=session['list_items'][i]['order_num'],
+                        is_important=session['list_items'][i]['importance'],
+                        is_done=session['list_items'][i]['finished']
+                    )
+                    db.session.add(new_item)
+        except Exception:
+            error_message = "An unexpected error has occurred. Please try again"
+            return redirect(url_for('all_lists', error_message=error_message))
     db.session.commit()
     return redirect(url_for("all_lists", current_user=current_user))
 
@@ -294,9 +309,13 @@ def save_list():
 @app.route("/delete-list", methods=["GET"])
 def delete_list():
     list_id = request.args.get('list_name_id')
-    list_to_delete = db.get_or_404(ListName, list_id)
-    db.session.delete(list_to_delete)
-    db.session.commit()
+    try:
+        list_to_delete = db.get_or_404(ListName, list_id)
+        db.session.delete(list_to_delete)
+        db.session.commit()
+    except Exception:
+        error_message = "An unexpected error has occurred. Please try again"
+        return redirect(url_for('all_lists', error_message=error_message))
     return redirect(url_for('all_lists'))
 
 @app.route("/change-importance")
