@@ -29,6 +29,13 @@ Bootstrap5(app)
 def load_user(user_id):
     return db.get_or_404(Users, user_id)
 
+def login_required(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if current_user.is_authenticated:
+            return func(*args, **kwargs)
+        return redirect(url_for('log_in'))
+    return decorated_function
 
 # Holds relationships between multiple users to a list name
 relationships_table = Table(
@@ -138,12 +145,14 @@ def log_in():
     return render_template("login.html", form=form, error_message=e)
 
 @app.route("/logout")
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('log_in'))
 
 # Route for displaying all lists user has generated
 @app.route("/all")
+@login_required
 def all_lists():
     error_message=request.args.get('error_message')
     session['list_items'] = []
@@ -160,6 +169,7 @@ def all_lists():
 # Generated page for naming the list - Checks if the name exists before letting you submit and go to new_list()
 # List name is stored in flask session
 @app.route("/name-list", methods=["GET", "POST"])
+@login_required
 def name_list():
     rename = request.args.get('rename')
     name_form = ToDoNameForm()
@@ -187,6 +197,7 @@ def name_list():
 
 # Generated after naming your list, lets you create to-do items - Stores them in flask session
 @app.route("/new-list", methods=["GET", "POST"])
+@login_required
 def new_list():
     item_form = ToDoItemForm()
     if item_form.validate_on_submit():
@@ -204,6 +215,7 @@ def new_list():
 
 # Page for editing an existing list - Add new items - Rename list
 @app.route("/edit-list/<list_url_id>", methods=["GET", "POST"])
+@login_required
 def edit_list(list_url_id):
     item_form = ToDoItemForm()
     try:
@@ -236,6 +248,7 @@ def edit_list(list_url_id):
 
 # Route for saving a new list
 @app.route("/save-list", methods=["GET", "POST"])
+@login_required
 def save_list():
     is_new_list = request.args.get('new_list')
     l_name = session['list_name']
@@ -307,6 +320,7 @@ def save_list():
 
 # Deletes parent ListName and ToDoItems children along with it via cascade defined in relationship
 @app.route("/delete-list", methods=["GET"])
+@login_required
 def delete_list():
     list_id = request.args.get('list_name_id')
     try:
@@ -319,6 +333,7 @@ def delete_list():
     return redirect(url_for('all_lists'))
 
 @app.route("/change-importance")
+@login_required
 def change_importance():
     task_index = int(request.args.get('task_index'))
     if session['list_items'][task_index]['importance'] == False:
@@ -329,6 +344,7 @@ def change_importance():
     return redirect(url_for('edit_list', list_url_id=session['list_url_id'], first_access=False))
 
 @app.route("/delete-task", methods=["GET"])
+@login_required
 def delete_task():
     is_new_list = request.args.get('new_list')
     item_form = ToDoItemForm()
@@ -347,6 +363,7 @@ def delete_task():
         return redirect(url_for('edit_list', list_url_id=session['list_url_id'],  first_access=False))
 
 @app.route("/task-done")
+@login_required
 def mark_as_completed():
    task_index = int(request.args.get('task_index'))
    if session['list_items'][task_index]['finished'] == False:
@@ -357,6 +374,7 @@ def mark_as_completed():
    return redirect(url_for('edit_list', list_url_id=session['list_url_id'], first_access=False))
 
 @app.route('/update_task_order', methods=['POST'])
+@login_required
 def update_task_order():
     data = request.get_json()
     new_order = []

@@ -27,7 +27,23 @@ a {
 }
 
 .form {
+    align-items: center;
+    display: flex;
     width: 400px;
+    justify-content: center;
+    flex-direction: column;
+}
+
+@media (max-width: 600px) {
+    .form {
+        width: 350px;
+    }
+}
+
+@media (max-width: 350px) {
+    .form {
+        width: 300px;
+    }
 }
 
 .form-control {
@@ -38,14 +54,18 @@ a {
 @media (max-width: 600px) {
     .form-control {
         width: 350px;
+
     }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 350px) {
     .form-control {
-        width: 200px;
+        width: 300px;
+
     }
 }
+
+
 
 #footer-bar {
     align-items: center;
@@ -105,6 +125,17 @@ a {
     text-align: center;
 }
 
+@media (max-width: 600px) {
+    #new-user-h1 {
+        font-size: 70px;
+    }
+}
+
+@media (max-width: 450px) {
+    #new-user-h1 {
+        font-size: 60px;
+    }
+}
 
 @media (max-width:369px) {
     #homepage-title {
@@ -182,7 +213,7 @@ main {
     align-items: center;
     display: flex;
     width: 100%;
-    min-height: calc(100vh - 80px);
+    min-height: calc(100vh - 90px);
 }
 
 
@@ -210,6 +241,7 @@ nav {
     display: flex;
     background-color: #10486d;
     flex-direction: column;
+    justify-content: center;
     width: 100%;
     padding-top: 30px;
     padding-bottom: 20px;
@@ -232,7 +264,7 @@ nav {
     display: flex;
     background-color: #272627;
     flex-wrap: wrap;
-    height: 40px;
+    height: 50px;
     width: 100%;
     padding: 0 150px;
 }
