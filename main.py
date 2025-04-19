@@ -182,11 +182,15 @@ def name_list():
             session['list_name'] = name_form.to_do_name.data
             return redirect(url_for('new_list'))
         else:
+            print("renaming!")
             list_url_id = request.args.get('url_id')
             try:
                 list_to_rename = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
                 list_to_rename.list_name = l_name
+                print(list_to_rename.list_name)
                 db.session.commit()
+                for task in list_to_rename.list_items:
+                    print(task.item)
                 return redirect(url_for('edit_list', list_url_id=list_url_id))
             except Exception:
                 error_message = "An unexpected error has occurred. Please try again"
@@ -218,6 +222,9 @@ def edit_list(list_url_id):
     item_form = ToDoItemForm()
     try:
         list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
+        print(list_to_edit.list_name)
+        for item in session['list_items']:
+            print(item['task'])
         if session['first_access'] == True:
             session['first_access'] = False
             session['list_url_id'] = list_url_id
@@ -240,6 +247,7 @@ def edit_list(list_url_id):
         error_message = "An unexpected error has occurred. Please try again"
         return redirect(url_for('all_lists', error_message=error_message))
     current_url = request.url
+
     return render_template('edit-list.html', current_user=current_user, list=list_to_edit,
                            item_form=item_form, tasks=session['list_items'], current_url=current_url)
 

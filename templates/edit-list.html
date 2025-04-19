@@ -9,12 +9,15 @@
         {% endwith %}
 
         <p class="list-name">{{ list.list_name }} <a href="{{ url_for('name_list', rename='rename', url_id=list.list_url_id) }}"><i class="bi bi-pencil-square name-pencil"></i></a></p>
-        <button type="button" class="btn btn-secondary" id="share-btn" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="<p class='share-p'>Share this link:</p>
-            <p class='share-url'>{{ current_url }}</p>"
-            >Share
-        </button>
+        <div id="save-share-btn-div">
+            <button type="button" class="btn btn-secondary" id="share-btn" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-content="<p class='share-p'>Share this link:</p>
+                <p class='share-url'>{{ current_url }}</p>"
+                >Share
+            </button>
+            <button type="button" id="save-button" onclick="window.location.href='{{ url_for('save_list', new_list=False) }}'">Save</button>
+        </div>
 
-        <button type="button" id="save-button" onclick="window.location.href='{{ url_for('save_list', new_list=False) }}'">Save</button>
+
     </div>
     <div id="list-item-bar">
         {{ render_form(item_form, novalidate=True) }}
