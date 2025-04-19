@@ -176,23 +176,21 @@ def name_list():
     session['list_items'] = []
     if name_form.validate_on_submit():
         l_name = name_form.to_do_name.data
-        # Check for if user already has a list with the same name
-        if not any(l_name == list_name.list_name for list_name in current_user.list_names):
 
-            # Checking if a list is being renamed or if a new list is being made via 'rename' variable from 'edit-list.html'
-            if not rename == 'rename':
-                session['list_name'] = name_form.to_do_name.data
-                return redirect(url_for('new_list'))
-            else:
-                list_url_id = request.args.get('url_id')
-                try:
-                    list_to_rename = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
-                    list_to_rename.list_name = l_name
-                    db.session.commit()
-                    return redirect(url_for('edit_list', list_url_id=list_url_id))
-                except Exception:
-                    error_message = "An unexpected error has occurred. Please try again"
-                    return redirect(url_for('all_lists', error_message=error_message))
+        # Checking if a list is being renamed or if a new list is being made via 'rename' variable from 'edit-list.html'
+        if not rename == 'rename':
+            session['list_name'] = name_form.to_do_name.data
+            return redirect(url_for('new_list'))
+        else:
+            list_url_id = request.args.get('url_id')
+            try:
+                list_to_rename = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
+                list_to_rename.list_name = l_name
+                db.session.commit()
+                return redirect(url_for('edit_list', list_url_id=list_url_id))
+            except Exception:
+                error_message = "An unexpected error has occurred. Please try again"
+                return redirect(url_for('all_lists', error_message=error_message))
     return render_template('name-list.html', current_user=current_user, name_form=name_form, rename=rename)
 
 # Generated after naming your list, lets you create to-do items - Stores them in flask session

@@ -195,20 +195,24 @@ input.btn:hover{
     text-align: center;
 }
 
+#name-list-h1 {
+    font-size: 65px;
+}
+
 @media (max-width: 450px) {
-    #homepage-title {
+    #homepage-title, #name-list-h1 {
         font-size: 55px;
     }
 }
 
 @media (max-width: 600px) {
-    #new-user-h1 {
+    #new-user-h1, #name-list-h1 {
         font-size: 70px;
     }
 }
 
 @media (max-width: 450px) {
-    #new-user-h1 {
+    #new-user-h1, #name-list-h1 {
         font-size: 60px;
     }
 }
@@ -254,9 +258,16 @@ label {
 #list-card-holder {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     width: 100%;
     min-height: calc(100vh - 200px);
     padding: 0 80px 80px 80px;
+}
+
+@media (max-width: 500px) {
+    #list-card-holder {
+    padding: 0 40px 40px 40px;
+    }
 }
 
 #list-item-bar {

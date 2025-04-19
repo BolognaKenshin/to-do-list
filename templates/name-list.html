@@ -3,9 +3,9 @@
 <main>
     <div id="name-list-div">
         {% if rename: %}
-        <h1 class="name-list-h1">Rename your List</h1>
+        <h1 id="name-list-h1">Rename your List</h1>
         {% else %}
-        <h1 class="name-list-h1">Enter your list's name</h1>
+        <h1 id="name-list-h1">Enter your list's name</h1>
         {% endif %}
 
         {% with messages = get_flashed_messages() %}
