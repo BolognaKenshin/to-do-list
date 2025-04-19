@@ -8,13 +8,14 @@ formatted_date= now.strftime("%m/%d/%y")
 
 # For Registering a new user
 class NewUserForm(FlaskForm):
-    email = StringField("E-mail Address", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
+    email = StringField("E-mail Address", validators=[DataRequired()], render_kw={"placeholder": "E-Mail"})
+    password = PasswordField("Password", validators=[DataRequired()], render_kw={"placeholder": "Password"})
     submit = SubmitField("Sign up")
+
 # For registered users to log in
 class LoginForm(FlaskForm):
-    email = StringField("E-mail Address", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
+    email = StringField("E-mail Address", validators=[DataRequired()], render_kw={"placeholder": "E-Mail"})
+    password = PasswordField("Password", validators=[DataRequired()], render_kw={"placeholder": "Password"})
     submit = SubmitField("Log in")
 
 # To generate the name of each to-do list, which will be the parent to items in the to-do items table
