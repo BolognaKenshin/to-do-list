@@ -8,7 +8,7 @@
         {% endfor %}
         {% endwith %}
 
-        <p class="list-name">{{ list_name }}</p>
+        <p class="list-name">{{ list_name }} </p>
 
         <button id="save-button" onclick="window.location.href='{{ url_for('save_list', new_list=True) }}'">Save</button>
     </div>

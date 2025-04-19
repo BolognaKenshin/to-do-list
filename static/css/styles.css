@@ -28,8 +28,47 @@ a {
 }
 
 .popover {
-    height: 200px;
+    align-items: center;
+    background-color: #white;
+    border-color: #272627;
+    border-width: 2px;
+    display: flex;
+    flex-direction: column;
+    height: 150px;
     width: 200px;
+    text-align: center;
+
+}
+
+.bs-popover-auto[data-popper-placement^=top]>.popover-arrow::after {
+    border-top-color: #272627;
+}
+.pop-delete-btn {
+    background-color: white;
+    border-color: rgb(168, 13, 21);
+    border-width: 2px;
+    color: rgb(168, 13, 21);
+    font-family: "Fredoka", sans-serif;
+}
+
+.pop-delete-btn:hover {
+    background-color: rgb(168, 13, 21);
+    border-color: rgb(168, 13, 21);
+    color: white;
+}
+
+.delete-p, .share-p {
+    color: #10486d;
+    font-family: "Fredoka", sans-serif;
+    font-size: 20px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.share-url {
+    color: #10486d;
+    font-family: "Fredoka", sans-serif;
+    font-size: 15px;
 }
 
 .error_message {
@@ -260,7 +299,6 @@ label {
     flex-wrap: wrap;
     justify-content: center;
     width: 100%;
-    min-height: calc(100vh - 200px);
     padding: 0 80px 80px 80px;
 }
 
@@ -280,9 +318,11 @@ label {
 }
 
 .list-name {
-    font-size: 20px;
+    font-family: "Fredoka", sans-serif;
+    font-size: 30px;
     color: white;
     text-align: center;
+    margin: 0;
 }
 
 #list-name-bar {
@@ -291,7 +331,7 @@ label {
     display: flex;
     height: 80px;
     width: 100%;
-    padding: 0 50px;
+    padding: 0 150px;
 }
 
 
@@ -337,10 +377,11 @@ nav {
 
 #tasks-container {
     align-items: center;
+    background-color: #17669a;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    height: calc(100vh - 240px);
+    min-height: calc(100vh - 250px);
     padding-top: 30px;
     width: 100%;
 }
@@ -373,26 +414,62 @@ nav {
     }
 }
 
-#save-button, #share-button {
+#save-button, #share-btn {
+    background-color: #10486d;
+    border-color: white;
     border-radius: 10px;
+    border-width: 2px;
+    border-style: solid;
+    color: white;
+    font-family: "Fredoka", sans-serif;
     flex-shrink: 0;
     margin-left: auto;
     height: 40px;
     width: 80px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#save-button:hover, #share-button:hover {
+    background-color: white;
+    border-color: white;
+    color: #10486d;
 }
 
 .task-div, .task-complete-div, .task-important-div{
     align-items: center;
     background-color: white;
-    border-radius: 10px;
+    border-radius: 15px;
     border-color: black;
     border-style: solid;
-    border-width: 5px;
+    border-width: 3px;
     display: flex;
+    flex-wrap: wrap;
     width: 60%;
     min-height: 200px;
     justify-content: center;
     margin: 30px 0;
+    padding: 0 30px;
+}
+
+.task-name, .task-name-done {
+    color: #10486d;
+    font-family: "Fredoka", sans-serif;
+    font-weight: 400;
+    font-size: 30px;
+    margin: 10px;
+    max-width: 100%;
+    overflow-wrap: break-word;
+}
+
+.task-name-done {
+    color: rgb(209, 203, 203);
+}
+
+.task-button-div {
+    align-items: center;
+    display: flex;
+    width: 100%;
+    justify-content: center;
 }
 
 #top-bar-email {
@@ -422,24 +499,26 @@ i.bi-card-checklist {
 }
 
 i.bi-check {
-    font-size: 2.5rem;
+    font-size: 3.5rem;
     line-height: 1;
     color: rgb(209, 203, 203);
 }
 
 
 i.bi-check:hover{
-    color: #10486d;
+    color: rgb(19, 112, 42);
 }
 
 i.bi-check-complete {
-    color: #10486d
+    color: rgb(19, 112, 42);
 }
 
 i.bi-exclamation-circle {
     color: rgb(209, 203, 203);
-    font-size: 1.75rem;
+    font-size: 30px;
     line-height: 1;
+    margin-left: 40px;
+    margin-right: 50px;
 }
 
 i.bi-exclamation-circle:hover {
@@ -456,7 +535,7 @@ i.important-done {
 
 i.bi-trash3, i.bi-pencil-square {
     color: rgb(209, 203, 203);
-    font-size: 20px;
+    font-size: 30px;
     line-height: 1;
 }
 
@@ -465,6 +544,9 @@ i.bi-trash3:hover, i.bi-pencil-square:hover {
     transition: color 0.2s ease;
 }
 
+i.task-trash {
+    margin: 0;
+}
 
 i.bi-pencil-square {
     margin: 10px;
@@ -512,11 +594,11 @@ span {
 }
 
 .sortable-placeholder {
-    background: #f0f0f0; /* Light background */
-    border: 1px dashed #ccc; /* Dashed border */
-    height: 50px; /* Match .task-div height */
-    margin: 5px 0; /* Match .task-div margins */
-    opacity: 0.5; /* Slight transparency */
+    background: #f0f0f0;
+    border: 1px dashed #ccc;
+    height: 50px;
+    margin: 5px 0;
+    opacity: 0.5;
 }
 
 .card-button-div {
