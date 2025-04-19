@@ -4,6 +4,8 @@ a {
 
 #all-lists-headline {
     color: white;
+    font-family: "Merriweather Sans", sans-serif;
+    font-size: 40px;
     text-align: center;
     margin: 20px 0;
 }
@@ -86,8 +88,6 @@ a {
 
     }
 }
-
-
 
 #footer-bar {
     align-items: center;
@@ -243,15 +243,12 @@ label {
     background-color: white;
     border-radius: 10px;
     display: flex;
-    height: 200px;
+    flex-direction: column;
+    height: 150px;
     width: 300px;
     justify-content: center;
     margin: 10px;
     text-align: center;
-}
-
-.list-card.done {
-    color: rgb(209, 203, 203);
 }
 
 #list-card-holder {
@@ -446,15 +443,19 @@ i.important-done {
     color: #10486d;
 }
 
-i.bi-trash3 {
-    color: black;
+i.bi-trash3, i.bi-pencil-square {
+    color: rgb(209, 203, 203);
+    font-size: 20px;
     line-height: 1;
+}
+
+i.bi-trash3:hover, i.bi-pencil-square:hover {
+    color: #10486d;
+    transition: color 0.2s ease;
 }
 
 
 i.bi-pencil-square {
-    color: black;
-    line-height: 1;
     margin: 10px;
 }
 
@@ -505,4 +506,38 @@ span {
     height: 50px; /* Match .task-div height */
     margin: 5px 0; /* Match .task-div margins */
     opacity: 0.5; /* Slight transparency */
+}
+
+.card-button-div {
+    display: flex;
+
+    justify-content: space-evenly;
+    width: 35%;
+}
+
+.list-card-name, .list-done-name {
+    color: #10486d;
+    font-family: "Fredoka", sans-serif;
+    font-weight: 450;
+    margin-bottom: 25px;
+
+}
+
+.list-done-name {
+    color: rgb(209, 203, 203);
+    margin-bottom: 25px;
+}
+
+.delete-list-btn {
+    color: rgb(209, 203, 203);
+    background-color: white;
+    border-width: 0;
+    padding: 0;
+}
+
+.delete-list-btn:hover {
+    background-color: white;
+
+}
+
 

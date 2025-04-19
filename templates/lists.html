@@ -1,7 +1,7 @@
 {% include 'header.html' %}
 
 <main id="all-lists-main">
-        <h1 id="all-lists-headline">This page will show all lists!</h1>
+        <h1 id="all-lists-headline">Your lists</h1>
         {% if error_message %}
             <p class="error_message">{{ error_message }}</p>
         {% endif %}
@@ -9,28 +9,32 @@
                 {% set delete_list_url = url_for('delete_list') %}
                 {% for list in ongoing_lists %}
                 <div class="list-card">
-                        <h2>{{ list.list_name }}</h2>
-                        <a href="{{ url_for('edit_list', list_url_id=list.list_url_id) }}"><i class="bi bi-pencil-square"></i></a>
-                        <button type="button" class="btn btn-secondary delete-list-btn" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="<p>Delete this list?</p>
-                                <form action='/delete-list' methods='DELETE'>
-                                        <input type='hidden' name='list_name_id' value='{{ list.id }}'>
-                                        <button type='submit' class='btn btn-primary'>Delete</button>
-                                </form>">
-                                <i class="bi bi-trash3"></i>
-                        </button>
+                        <h2 class="list-card-name">{{ list.list_name }}</h2>
+                        <div class="card-button-div">
+                            <a href="{{ url_for('edit_list', list_url_id=list.list_url_id) }}"><i class="bi bi-pencil-square"></i></a>
+                            <button type="button" class="btn btn-secondary delete-list-btn" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="<p>Delete this list?</p>
+                                    <form action='/delete-list' methods='DELETE'>
+                                            <input type='hidden' name='list_name_id' value='{{ list.id }}'>
+                                            <button type='submit' class='btn btn-primary'>Delete</button>
+                                    </form>">
+                                    <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
                 </div>
                 {% endfor %}
                 {% for list in finished_lists %}
                  <div class="list-card done">
-                        <s>{{ list.list_name }}</s>
-                        <a href="{{ url_for('edit_list', list_url_id=list.list_url_id) }}"><i class="bi bi-pencil-square"></i></a>
-                        <button type="button" class="btn btn-secondary delete-list-btn" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="<p>Delete this list?</p>
-                                <form action='/delete-list' methods='DELETE'>
-                                        <input type='hidden' name='list_name_id' value='{{ list.id }}'>
-                                        <button type='submit' class='btn btn-primary'>Delete</button>
-                                </form>">
-                                <i class="bi bi-trash3"></i>
-                        </button>
+                        <h2 class="list-done-name"><s>{{ list.list_name }}</s></h2>
+                        <div class="card-button-div">
+                            <a href="{{ url_for('edit_list', list_url_id=list.list_url_id) }}"><i class="bi bi-pencil-square"></i></a>
+                            <button type="button" class="btn btn-secondary delete-list-btn" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="<p>Delete this list?</p>
+                                    <form action='/delete-list' methods='DELETE'>
+                                            <input type='hidden' name='list_name_id' value='{{ list.id }}'>
+                                            <button type='submit' class='btn btn-primary'>Delete</button>
+                                    </form>">
+                                    <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
                 </div>
                 {% endfor %}
         </div>
