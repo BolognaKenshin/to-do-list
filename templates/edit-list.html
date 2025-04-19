@@ -8,7 +8,7 @@
         {% endfor %}
         {% endwith %}
 
-        <p class="list-name">{{ list.list_name }} <a href="{{ url_for('name_list', rename='rename', url_id=list.list_url_id) }}"><i class="bi bi-pencil-square name-pencil"></i></a></p>
+        <p class="list-name">{{ list_name }} <a href="{{ url_for('name_list', rename='rename', list_url_id=list_url_id) }}"><i class="bi bi-pencil-square name-pencil"></i></a></p>
         <div id="save-share-btn-div">
             <button type="button" class="btn btn-secondary" id="share-btn" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-content="<p class='share-p'>Share this link:</p>
                 <p class='share-url'>{{ current_url }}</p>"

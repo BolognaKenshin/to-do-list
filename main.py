@@ -137,7 +137,6 @@ def log_in():
                 flash("The password entered is invalid.")
             else:
                 login_user(user)
-                print('logging in!')
                 return redirect(url_for('all_lists'))
         except Exception:
             e = "An unexpected error has occurred. Please try again."
@@ -181,18 +180,11 @@ def name_list():
             session['list_name'] = name_form.to_do_name.data
             return redirect(url_for('new_list'))
         else:
-            print("renaming!")
-            list_url_id = request.args.get('url_id')
+            list_url_id = request.args.get('list_url_id')
             try:
-                list_to_rename = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
-                list_to_rename.list_name = l_name
                 session['list_name'] = l_name
-                print(list_to_rename.list_name)
-                db.session.commit()
-                for task in list_to_rename.list_items:
-                    print(task.item)
                 return redirect(url_for('edit_list', list_url_id=list_url_id))
-            except Exception:
+            except Exception as e:
                 error_message = "An unexpected error has occurred. Please try again"
                 return redirect(url_for('all_lists', error_message=error_message))
     return render_template('name-list.html', current_user=current_user, name_form=name_form, rename=rename)
@@ -220,12 +212,9 @@ def new_list():
 @login_required
 def edit_list(list_url_id):
     item_form = ToDoItemForm()
-    try:
-        list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
-        print(list_to_edit.list_name)
-        for item in session['list_items']:
-            print(item['task'])
-        if session['first_access'] == True:
+    if session['first_access'] == True:
+        try:
+            list_to_edit = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
             session['first_access'] = False
             session['list_url_id'] = list_url_id
             session['list_name'] = list_to_edit.list_name
@@ -236,20 +225,21 @@ def edit_list(list_url_id):
                         "finished": task.is_done,
                         "order_num": task.order_num,}
                 session['list_items'].append(item)
-        if item_form.validate_on_submit():
-            new_item = {"task":item_form.task.data,
-                        "order_num": len(session['list_items']),
-                        "importance": False,
-                        "finished": False,}
-            session['list_items'].append(new_item)
-            session.modified = True
-    except Exception:
-        error_message = "An unexpected error has occurred. Please try again"
-        return redirect(url_for('all_lists', error_message=error_message))
-    current_url = request.url
+        except Exception as e:
+            error_message = "An unexpected error has occurred. Please try again"
+            return redirect(url_for('all_lists', error_message=error_message))
 
-    return render_template('edit-list.html', current_user=current_user, list=list_to_edit,
-                           item_form=item_form, tasks=session['list_items'], current_url=current_url)
+    if item_form.validate_on_submit():
+        new_item = {"task": item_form.task.data,
+                    "order_num": len(session['list_items']),
+                    "importance": False,
+                    "finished": False, }
+        session['list_items'].append(new_item)
+        session.modified = True
+
+    current_url = request.url
+    return render_template('edit-list.html', current_user=current_user, list_name=session['list_name'],
+                           item_form=item_form, tasks=session['list_items'], current_url=current_url, list_url_id=session['list_url_id'])
 
 
 # Route for saving a new list
