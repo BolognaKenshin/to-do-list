@@ -18,9 +18,9 @@
 
     <div id="tasks-container">
         {% for task in tasks %}
-        <div class="task-div">
-            <p>{{ task['task'] }}</p>
-            <button type="button" onclick="window.location.href='{{ url_for('delete_task', new_list=True, task_index=tasks.index(task)) }}'"><i class="bi bi-trash3"></i></button>
+        <div class="task-div new-task-div">
+            <p class="task-name">{{ task['task'] }}</p>
+            <button type="button" class="task-button" onclick="window.location.href='{{ url_for('delete_task', new_list=True, task_index=tasks.index(task)) }}'"><i class="bi bi-trash3 task-trash"></i></button>
         </div>
         {% endfor %}
     </div>
