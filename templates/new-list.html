@@ -9,7 +9,7 @@
         {% endwith %}
 
         <p class="list-name">{{ list_name }} </p>
-
+        <div id="save-share-btn-div"></div>
         <button id="save-button" onclick="window.location.href='{{ url_for('save_list', new_list=True) }}'">Save</button>
     </div>
     <div id="list-item-bar">

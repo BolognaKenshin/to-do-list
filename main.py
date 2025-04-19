@@ -173,7 +173,6 @@ def all_lists():
 def name_list():
     rename = request.args.get('rename')
     name_form = ToDoNameForm()
-    session['list_items'] = []
     if name_form.validate_on_submit():
         l_name = name_form.to_do_name.data
 
@@ -187,6 +186,7 @@ def name_list():
             try:
                 list_to_rename = db.session.execute(db.Select(ListName).where(ListName.list_url_id == list_url_id)).scalar()
                 list_to_rename.list_name = l_name
+                session['list_name'] = l_name
                 print(list_to_rename.list_name)
                 db.session.commit()
                 for task in list_to_rename.list_items:
