@@ -19,7 +19,8 @@ idea/
 Thumbs.db
 
 # Meant for database file
-.db
-
-
 /instance
+.db/
+
+
+
